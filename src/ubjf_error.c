@@ -36,6 +36,8 @@ const char *ubjf_make_error_msg(ubjf_error err)
 		msg = strcpy(UBJF_MALLOC(26), "Failed to write to output");
 	else if (err == UBJF_ERROR_BAD_DATA)
 		msg = strcpy(UBJF_MALLOC(16), "Failed to parse");
+	else if (err == UBJF_ERROR_UNKNOWN)
+		msg = strcpy(UBJF_MALLOC(14), "Unknown error");
 	else if (err & UBJF_ERROR_PARAM)
 		msg = format_param_error(UBJF_PARAM_ERROR_GET_INDEX(err));
 	return msg;

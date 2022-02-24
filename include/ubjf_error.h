@@ -10,13 +10,15 @@ typedef enum
 {
 	UBJF_NO_ERROR = 0,
 	/** Failed to allocate memory. */
-	UBJF_ERROR_ALLOC = 1,
+	UBJF_ERROR_ALLOC,
 	/** Failed to read from input. */
-	UBJF_EOF = 2,
+	UBJF_EOF,
 	/** Failed to write to output. */
-	UBJF_ERROR_BAD_WRITE = 3,
+	UBJF_ERROR_BAD_WRITE,
 	/** Invalid input, failed to parse. */
-	UBJF_ERROR_BAD_DATA = 4,
+	UBJF_ERROR_BAD_DATA,
+	/** Unknown error. */
+	UBJF_ERROR_UNKNOWN,
 	/** Passed parameter is invalid. */
 	UBJF_ERROR_PARAM = 1 << 8, /* Index of the bad parameter stored as bottom 8 bits. */
 } ubjf_error;
