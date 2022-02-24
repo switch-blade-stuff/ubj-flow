@@ -19,13 +19,7 @@ if (UBJF_NO_CHECKS)
     add_compile_definitions(UBJF_DISABLE_CHECKS)
 endif ()
 
-generate_export_header(${PROJECT_NAME}
-        BASE_NAME ubjf
-        EXPORT_MACRO_NAME UBJF_API
-        EXPORT_FILE_NAME ${CMAKE_CURRENT_LIST_DIR}/include/ubjf_export.h)
-
-include(${CMAKE_CURRENT_LIST_DIR}/include/CMakeLists.txt)
-include(${CMAKE_CURRENT_LIST_DIR}/src/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/ubjf/CMakeLists.txt)
 
 add_subdirectory(test)
 

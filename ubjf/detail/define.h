@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "ubjf_export.h"
+#include "export.h"
 
 #ifdef __cplusplus
 #define UBJF_EXTERN extern "C" UBJF_API

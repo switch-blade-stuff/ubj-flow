@@ -2,31 +2,11 @@
 // Created by switchblade on 2022-02-24.
 //
 
-#include "ubjf_read.h"
+#include "read.h"
 
-#include "detail/error_handling.h"
-#include "detail/token.h"
-#include "detail/bswap.h"
-
-static const ubjf_type ubjf_token_type_map[UBJF_TOKEN_MAX] = {
-		[UBJF_TOKEN_NULL]         = UBJF_NULL,
-		[UBJF_TOKEN_NOOP]         = UBJF_NOOP,
-		[UBJF_TOKEN_TRUE]         = UBJF_BOOL,
-		[UBJF_TOKEN_FALSE]        = UBJF_BOOL,
-		[UBJF_TOKEN_INT8]         = UBJF_INT8,
-		[UBJF_TOKEN_UINT8]        = UBJF_UINT8,
-		[UBJF_TOKEN_INT16]        = UBJF_INT16,
-		[UBJF_TOKEN_INT32]        = UBJF_INT32,
-		[UBJF_TOKEN_INT64]        = UBJF_INT64,
-		[UBJF_TOKEN_FLOAT32]      = UBJF_FLOAT32,
-		[UBJF_TOKEN_FLOAT64]      = UBJF_FLOAT64,
-		[UBJF_TOKEN_HIGHP]        = UBJF_HIGHP,
-		[UBJF_TOKEN_CHAR]         = UBJF_CHAR,
-		[UBJF_TOKEN_STRING]       = UBJF_STRING,
-		[UBJF_TOKEN_ARRAY_START]  = UBJF_ARRAY,
-		[UBJF_TOKEN_OBJECT_START] = UBJF_OBJECT,
-};
-#define IS_VALID_TYPE_TOKEN(token) (ubjf_token_type_map[token] != 0)
+#include "error_handling.h"
+#include "token.h"
+#include "bswap.h"
 
 /* Store all relevant data in a single structure for single pointer access. */
 typedef struct
@@ -49,6 +29,26 @@ typedef struct
 	int64_t size;
 	ubjf_type type;
 } ubjf_value_ctx;
+
+static const ubjf_type ubjf_token_type_map[UBJF_TOKEN_MAX] = {
+		[UBJF_TOKEN_NULL]         = UBJF_NULL,
+		[UBJF_TOKEN_NOOP]         = UBJF_NOOP,
+		[UBJF_TOKEN_TRUE]         = UBJF_BOOL,
+		[UBJF_TOKEN_FALSE]        = UBJF_BOOL,
+		[UBJF_TOKEN_INT8]         = UBJF_INT8,
+		[UBJF_TOKEN_UINT8]        = UBJF_UINT8,
+		[UBJF_TOKEN_INT16]        = UBJF_INT16,
+		[UBJF_TOKEN_INT32]        = UBJF_INT32,
+		[UBJF_TOKEN_INT64]        = UBJF_INT64,
+		[UBJF_TOKEN_FLOAT32]      = UBJF_FLOAT32,
+		[UBJF_TOKEN_FLOAT64]      = UBJF_FLOAT64,
+		[UBJF_TOKEN_HIGHP]        = UBJF_HIGHP,
+		[UBJF_TOKEN_CHAR]         = UBJF_CHAR,
+		[UBJF_TOKEN_STRING]       = UBJF_STRING,
+		[UBJF_TOKEN_ARRAY_START]  = UBJF_ARRAY,
+		[UBJF_TOKEN_OBJECT_START] = UBJF_OBJECT,
+};
+#define IS_VALID_TYPE_TOKEN(token) (ubjf_token_type_map[token] != 0)
 
 static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx);
 int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *nodes)
@@ -82,12 +82,6 @@ int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *nodes)
 	else
 		return 1;
 }
-
-
-
-
-
-
 
 static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx)
 {

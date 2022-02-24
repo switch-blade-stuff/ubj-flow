@@ -22,7 +22,6 @@
         THROW_ERROR(buf, error);  \
     } while (0)
 
-
 #define GUARDED_INVOKE(ctx, func, ...)                              \
     do {                                                            \
         ubjf_error invoke_result;                                   \
