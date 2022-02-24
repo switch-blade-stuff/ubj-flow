@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.22)
+project(ubjf C)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
+include(GenerateExportHeader)
+
+add_library(${PROJECT_NAME} SHARED)
+
+option(UBJF_BIG_ENDIAN "Tells the library that the architecture is big-endian. By default, little-endian architectures are assumed." OFF)
+if (UBJF_BIG_ENDIAN)
+    add_compile_definitions(UBJF_BIG_ENDIAN)
+endif ()
+
+option(UBJF_NO_CHECKS "Disables certain internal checks that may affect performance" OFF)
+if (UBJF_NO_CHECKS)
+    add_compile_definitions(UBJF_DISABLE_CHECKS)
+endif ()
+
+generate_export_header(${PROJECT_NAME}
+        BASE_NAME ubjf
+        EXPORT_MACRO_NAME UBJF_API
+        EXPORT_FILE_NAME ${CMAKE_CURRENT_LIST_DIR}/include/ubjf_export.h)
+
+include(${CMAKE_CURRENT_LIST_DIR}/include/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/src/CMakeLists.txt)
+
+add_subdirectory(test)
+
+# TODO: Add install target
+
