@@ -100,14 +100,6 @@ static size_t do_read(ubjf_read_state *state, void *dest, size_t size, size_t n)
 		return 0;
 }
 
-enum extra_token_type
-{
-	STRONG_CONTAINER,
-	CONTAINER_SIZE,
-	OBJECT_ARRAY,
-	OBJECT_END,
-};
-
 static const int16_t token_table[255] = {
 		/* Type tokens. */
 		['N'] = UBJF_NOOP,
@@ -128,10 +120,10 @@ static const int16_t token_table[255] = {
 		['{'] = UBJF_OBJECT,
 
 		/* Extra tokens. */
-		[']'] = OBJECT_ARRAY,
-		['}'] = OBJECT_END,
-		['#'] = CONTAINER_SIZE,
-		['$'] = STRONG_CONTAINER,
+		[']'] = UBJF_ARRAY_END,
+		['}'] = UBJF_OBJECT_END,
+		['#'] = UBJF_CONTAINER_SIZE,
+		['$'] = UBJF_STRONG_CONTAINER,
 };
 
 #define INT8_SIZE 1

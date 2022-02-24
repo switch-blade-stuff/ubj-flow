@@ -26,7 +26,6 @@
 /** @brief Enum encoding all types defined by UBJSON. */
 typedef enum
 {
-	UBJF_INVALID = 0,
 	UBJF_NULL = UBJF_VALUE_TYPE(0),
 	UBJF_NOOP = UBJF_VALUE_TYPE(1),
 	UBJF_CHAR = UBJF_VALUE_TYPE(2),
@@ -48,6 +47,15 @@ typedef enum
 	UBJF_ARRAY = UBJF_CONTAINER_TYPE(1),
 	UBJF_OBJECT = UBJF_CONTAINER_TYPE(2),
 } ubjf_type;
+
+/** @brief Non-type tokens of UBJSON format. */
+typedef enum
+{
+	UBJF_STRONG_CONTAINER = 1,
+	UBJF_CONTAINER_SIZE,
+	UBJF_ARRAY_END,
+	UBJF_OBJECT_END,
+} ubjf_extra_token;
 
 /** Returns string containing name of the specified type.
  * @param[in] type Type to get name for.
