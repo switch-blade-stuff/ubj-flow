@@ -61,3 +61,14 @@
 #endif
 
 #endif
+
+#ifndef UBJF_BIG_ENDIAN
+
+#define FIX_ENDIANNESS_16(value) bswap_16(value)
+#define FIX_ENDIANNESS_32(value) bswap_32(value)
+#define FIX_ENDIANNESS_64(value) bswap_64(value)
+#else
+#define FIX_ENDIANNESS_16(...)
+#define FIX_ENDIANNESS_32(...)
+#define FIX_ENDIANNESS_64(...)
+#endif

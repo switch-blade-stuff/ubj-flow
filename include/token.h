@@ -1,0 +1,34 @@
+//
+// Created by switchblade on 2022-02-24.
+//
+
+#pragma once
+
+#include <stdint.h>
+
+typedef enum
+{
+	UBJF_TOKEN_NULL = 'Z',
+	UBJF_TOKEN_NOOP = 'N',
+	UBJF_TOKEN_TRUE = 'T',
+	UBJF_TOKEN_FALSE = 'F',
+	UBJF_TOKEN_INT8 = 'i',
+	UBJF_TOKEN_UINT8 = 'U',
+	UBJF_TOKEN_INT16 = 'I',
+	UBJF_TOKEN_INT32 = 'l',
+	UBJF_TOKEN_INT64 = 'L',
+	UBJF_TOKEN_FLOAT32 = 'd',
+	UBJF_TOKEN_FLOAT64 = 'D',
+	UBJF_TOKEN_HIGHP = 'H',
+	UBJF_TOKEN_CHAR = 'C',
+	UBJF_TOKEN_STRING = 'S',
+	UBJF_TOKEN_ARRAY_START = '[',
+	UBJF_TOKEN_ARRAY_END = ']',
+	UBJF_TOKEN_OBJECT_START = '{',
+	UBJF_TOKEN_OBJECT_END = '}',
+	UBJF_TOKEN_CONTAINER_TYPE = '$',
+	UBJF_TOKEN_CONTAINER_SIZE = '#',
+
+	UBJF_TOKEN_COUNT,
+	UBJF_TOKEN_MAX = UINT8_MAX,
+} ubjf_token;

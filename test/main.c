@@ -88,9 +88,9 @@ ubjf_error test_noop_event(struct test_array_data *data)
 	data->count++;
 	return UBJF_NO_ERROR;
 }
-ubjf_error test_noop_array_start_event(ubjf_type container_type,
+ubjf_error test_noop_array_start_event(ubjf_token container_type,
                                        int64_t fixed_size,
-                                       ubjf_type value_type,
+                                       ubjf_token value_type,
                                        struct test_array_data *data)
 {
 	data->started = true;
@@ -136,14 +136,14 @@ void test_parse_noop_array()
 
 ubjf_error test_bool_event(ubjf_value value, struct test_array_data *data)
 {
-	assert(value.type & UBJF_BOOL_TYPE_MASK);
+	assert(value.type_token & UBJF_BOOL_TYPE_MASK);
 	assert(value.boolean == true);
 	data->count++;
 	return UBJF_NO_ERROR;
 }
-ubjf_error test_bool_array_start_event(ubjf_type container_type,
+ubjf_error test_bool_array_start_event(ubjf_token container_type,
                                        int64_t fixed_size,
-                                       ubjf_type value_type,
+                                       ubjf_token value_type,
                                        struct test_array_data *data)
 {
 	data->started = true;
@@ -189,13 +189,13 @@ void test_parse_bool_array()
 
 ubjf_error test_string_array_event(ubjf_value value, struct test_array_data *data)
 {
-	assert(value.type == UBJF_STRING);
+	assert(value.type_token == UBJF_STRING);
 	data->count++;
 	return UBJF_NO_ERROR;
 }
-ubjf_error test_string_array_start_event(ubjf_type container_type,
+ubjf_error test_string_array_start_event(ubjf_token container_type,
                                          int64_t fixed_size,
-                                         ubjf_type value_type,
+                                         ubjf_token value_type,
                                          struct test_array_data *data)
 {
 	data->started = true;
@@ -264,7 +264,7 @@ void test_bool_parse()
 
 	assert(bytes == sizeof(data));
 	assert(error == UBJF_NO_ERROR);
-	assert(out.type & UBJF_BOOL_TYPE_MASK);
+	assert(out.type_token & UBJF_BOOL_TYPE_MASK);
 	assert(out.boolean == true);
 
 	ubjf_destroy_buffer_read(&state);
@@ -291,7 +291,7 @@ void test_string_parse()
 
 	assert(bytes == sizeof(data));
 	assert(error == UBJF_NO_ERROR);
-	assert(out.type == UBJF_STRING);
+	assert(out.type_token == UBJF_STRING);
 	assert(strncmp(out.string, data + 6, 12) == 0);
 
 	free((void *) out.string);
