@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "ubjf.h"
+#include "detail/ubjf.h"
 
 void test_error_msg();
 void test_parse_error();

@@ -123,9 +123,3 @@ void ubjf_destroy_buffer_read(ubjf_read_state *state)
 	if (UBJF_LIKELY(state))
 		UBJF_FREE(state->read_event_info.udata);
 }
-
-void ubjf_destroy_value(ubjf_value value)
-{
-	if (value.type == UBJF_STRING || value.type == UBJF_HIGHP)
-		UBJF_FREE((void *) value.string);
-}

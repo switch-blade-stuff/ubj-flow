@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "ubjf_error.h"
+#include "error.h"
 
 #include <setjmp.h>
 

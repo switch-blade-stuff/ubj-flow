@@ -8,9 +8,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "define.h"
-#include "ubjf_error.h"
-#include "type.h"
+#include "detail/define.h"
+#include "detail/error.h"
+#include "detail/type.h"
 
 typedef size_t (*ubjf_read_func)(void *dest, size_t n, void *udata);
 typedef int (*ubjf_peek_func)(void *udata);
@@ -116,8 +116,7 @@ UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
 /** Reads in next UBJSON node and invokes appropriate parse_event_info.
  * @param[in] state State to use for reading.
  * @param[out] error Pointer to the value set in case of an error. Optional.
- * @param[out] bytes Pointer to the value set to the amount of bytes read. Optional.
  * @param[out] nodes Pointer to the value set to the amount of nodes processed. Optional.
  * @return On success, returns 0. On EOF, returns `-1` and sets error to `UBJF_ERROR_EOF`.
  * In case of any other error, returns 1. */
-UBJF_EXTERN int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *bytes, size_t *nodes);
+UBJF_EXTERN int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *nodes);

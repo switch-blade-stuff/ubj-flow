@@ -4,5 +4,5 @@
 
 #pragma once
 
-#include "define.h"
-#include "ubjf_error.h"
+#include "detail/define.h"
+#include "detail/error.h"

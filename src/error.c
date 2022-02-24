@@ -2,12 +2,11 @@
 // Created by switchblade on 2022-02-23.
 //
 
-#include "ubjf_error.h"
+#include "detail/error.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <stdio.h>
 
 /* Need to store this externally. No allocations after allocation error. */
 static const char *alloc_error_msg = "Memory allocation error";

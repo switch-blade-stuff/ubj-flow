@@ -4,9 +4,9 @@
 
 #include "ubjf_read.h"
 
-#include "error_handling.h"
-#include "token.h"
-#include "bswap.h"
+#include "detail/error_handling.h"
+#include "detail/token.h"
+#include "detail/bswap.h"
 
 static const ubjf_type ubjf_token_type_map[UBJF_TOKEN_MAX] = {
 		[UBJF_TOKEN_NULL]         = UBJF_NULL,
@@ -26,7 +26,7 @@ static const ubjf_type ubjf_token_type_map[UBJF_TOKEN_MAX] = {
 		[UBJF_TOKEN_ARRAY_START]  = UBJF_ARRAY,
 		[UBJF_TOKEN_OBJECT_START] = UBJF_OBJECT,
 };
-#define IS_VALID_TOKEN(token) (ubjf_token_type_map[token] != 0)
+#define IS_VALID_TYPE_TOKEN(token) (ubjf_token_type_map[token] != 0)
 
 /* Store all relevant data in a single structure for single pointer access. */
 typedef struct
@@ -35,7 +35,6 @@ typedef struct
 	ubjf_read_event_info read_event_info;
 	ubjf_parse_event_info parse_event_info;
 	ubjf_error error;
-	size_t total_bytes;
 	size_t total_nodes;
 } ubjf_parse_ctx;
 
@@ -51,22 +50,12 @@ typedef struct
 	ubjf_type type;
 } ubjf_value_ctx;
 
-static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx)
-{
-	GUARD_ERROR(ctx->panic_buf, ctx->error)
-	{
-
-	} else RETHROW_ERROR(ctx->panic_buf, ctx->error);
-
-	END_GUARD(ctx->panic_buf);
-}
-
-int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *bytes, size_t *nodes)
+static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx);
+int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *nodes)
 {
 	ubjf_parse_ctx ctx = {
 			.panic_buf      = NULL,
 			.error          = UBJF_NO_ERROR,
-			.total_bytes    = 0,
 			.total_nodes    = 0,
 	};
 
@@ -79,12 +68,11 @@ int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *bytes, siz
 		ctx.read_event_info = state->read_event_info;
 		ctx.parse_event_info = state->parse_event_info;
 
-		/* Do the reading. */
+		/* Do the actual reading. */
 		ubjf_read_node_recursive(&ctx);
 	}
 
 	UBJF_SET_OPTIONAL(error, ctx.error);
-	UBJF_SET_OPTIONAL(bytes, ctx.total_bytes);
 	UBJF_SET_OPTIONAL(nodes, ctx.total_nodes);
 
 	if (!ctx.error)
@@ -93,4 +81,20 @@ int ubjf_read_next(ubjf_read_state *state, ubjf_error *error, size_t *bytes, siz
 		return -1;
 	else
 		return 1;
+}
+
+
+
+
+
+
+
+static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx)
+{
+	GUARD_ERROR(ctx->panic_buf, ctx->error)
+	{
+
+	} else RETHROW_ERROR(ctx->panic_buf, ctx->error);
+
+	END_GUARD(ctx->panic_buf);
 }
