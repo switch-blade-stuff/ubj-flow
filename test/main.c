@@ -14,6 +14,7 @@ void test_parse_noop_array();
 void test_bool_parse();
 void test_parse_bool_array();
 void test_string_parse();
+void test_parse_string_array();
 
 int main()
 {
@@ -23,6 +24,7 @@ int main()
 	test_bool_parse();
 	test_parse_bool_array();
 	test_string_parse();
+	test_parse_string_array();
 }
 
 void test_error_msg()
@@ -184,6 +186,59 @@ void test_parse_bool_array()
 
 	ubjf_destroy_buffer_read(&state);
 }
+
+ubjf_error test_string_array_event(ubjf_value value, struct test_array_data *data)
+{
+	assert(value.type == UBJF_STRING);
+	data->count++;
+	return UBJF_NO_ERROR;
+}
+ubjf_error test_string_array_start_event(ubjf_type container_type,
+                                         int64_t fixed_size,
+                                         ubjf_type value_type,
+                                         struct test_array_data *data)
+{
+	data->started = true;
+	assert(container_type == UBJF_ARRAY);
+	assert(fixed_size == 0);
+	assert(value_type == 0);
+	return UBJF_NO_ERROR;
+}
+ubjf_error test_string_array_end_event(struct test_array_data *data)
+{
+	data->ended = true;
+	return UBJF_NO_ERROR;
+}
+void test_parse_string_array()
+{
+	const char data[14] = "[Si\0Si\0Si\0Si\0]";
+
+	struct test_array_data event_data = {};
+	ubjf_parse_event_info event_info = {
+			.on_value = (ubjf_on_value_func) test_string_array_event,
+			.on_container_begin = (ubjf_on_container_begin_func) test_string_array_start_event,
+			.on_container_end = (ubjf_on_container_end_func) test_string_array_end_event,
+			.udata = &event_data,
+	};
+	ubjf_read_state state;
+	ubjf_error error;
+	size_t bytes = 0;
+
+	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
+	assert(error == UBJF_NO_ERROR);
+
+	for (size_t result = 0, consumed = 0; result != -1; result = ubjf_read_next(&state, &error, &consumed))
+		bytes += consumed;
+
+	assert(error == UBJF_EOF);
+	assert(bytes == sizeof(data));
+	assert(event_data.count == 4);
+	assert(event_data.started == true);
+	assert(event_data.ended == true);
+
+	ubjf_destroy_buffer_read(&state);
+}
+
 
 ubjf_error test_value_event(ubjf_value value, ubjf_value *out_value)
 {

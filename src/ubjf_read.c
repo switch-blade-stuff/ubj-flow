@@ -243,7 +243,8 @@ static void consume_bytes(ubjf_read_state *state, size_t *bytes, size_t n)
 
 static int64_t read_length(ubjf_read_state *state, size_t *bytes)
 {
-	switch (read_token(state, bytes))
+	int16_t token = read_token(state, bytes);
+	switch (token)
 	{
 		case UBJF_INT8:
 		{
@@ -342,7 +343,6 @@ static void parse_float(ubjf_read_state *state, size_t *bytes, ubjf_value *value
 }
 static void parse_value(ubjf_read_state *state, size_t *bytes, ubjf_type type)
 {
-
 	ubjf_value value = {.type = type};
 	if (type & UBJF_BOOL_TYPE_MASK)
 		value.boolean = type & 1;
@@ -381,13 +381,9 @@ static void parse_array(ubjf_read_state *state, ubjf_error *error, size_t *bytes
 	else /* Fully dynamic. */
 		for (;;)
 		{
-			int16_t token = peek_token(state);
+			int16_t token = read_token(state, bytes);
 			if (token == UBJF_ARRAY_END)
-			{
-				consume_bytes(state, bytes, 1);
 				break;
-			}
-
 			parse_node_recursive(state, error, bytes, nodes, token);
 		}
 }
@@ -424,7 +420,7 @@ static void parse_object(ubjf_read_state *state, ubjf_error *error, size_t *byte
 			}
 
 			parse_key_node(state, bytes, nodes);
-			parse_node_recursive(state, error, bytes, nodes, token);
+			parse_node_recursive(state, error, bytes, nodes, read_token(state, bytes));
 		}
 }
 static void parse_container(ubjf_read_state *state, ubjf_error *error, size_t *bytes, size_t *nodes, ubjf_type type)
