@@ -10,7 +10,21 @@
 #include "ubjf_error.h"
 #include "ubjf_type.h"
 
-typedef size_t (*ubjf_read_func)(void *dest, size_t size, size_t n, void *udata);
+typedef size_t (*ubjf_read_func)(void *dest, size_t n, void *udata);
+typedef int (*ubjf_peek_func)(void *udata);
+typedef size_t (*ubjf_bump_func)(size_t n, void *udata);
+
+typedef struct
+{
+	/** User data passed to read event. */
+	void *udata;
+	/** Function used to read input. */
+	ubjf_read_func read;
+	/** Function used to advance input without reading. */
+	ubjf_bump_func bump;
+	/** Function used to read input without advancing. */
+	ubjf_peek_func peek;
+} ubjf_read_event_info;
 
 typedef struct
 {
@@ -34,11 +48,16 @@ typedef struct
 typedef ubjf_error (*ubjf_on_noop_func)(void *udata);
 typedef ubjf_error (*ubjf_on_value_func)(ubjf_value value, void *udata);
 typedef char *(*ubjf_on_string_alloc_func)(int64_t length, void *udata);
-typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type type, void *udata);
+typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type container_type,
+                                                   int64_t fixed_size,
+                                                   ubjf_type value_type,
+                                                   void *udata);
 typedef void (*ubjf_on_container_end_func)(void *udata);
 
 typedef struct
 {
+	/** User data passed to parse parse_events. */
+	void *udata;
 	/** Function called when a noop is parsed. */
 	ubjf_on_noop_func on_noop;
 	/** Function called when a value is parsed. */
@@ -51,32 +70,36 @@ typedef struct
 	ubjf_on_container_end_func on_container_end;
 	/** Function called when a container parse cannot be completed due to an error. */
 	ubjf_on_container_end_func on_container_error;
-	/** User data passed to parse callbacks. */
-	void *udata;
-} ubjf_read_parse_callback_info;
+} ubjf_parse_event_info;
 
 typedef struct
 {
-	/** Function used to request data read. */
-	ubjf_read_func read;
-	/** User data passed to read callback. */
-	void *read_udata;
+	/** Events used for reading. */
+	ubjf_read_event_info read_events;
+	/** Events used for parsing. */
+	ubjf_parse_event_info parse_events;
 
-	/** Pointer too data used for error handling. */
+	/** Pointer to data used for error handling. */
 	void *panic;
-
-	/** Callbacks used for this state. */
-	ubjf_read_parse_callback_info callbacks;
 } ubjf_read_state;
 
+/** Initializes an instance of `ubjf_read_state` for custom events.
+ * @param[out] state State to initialize.
+ * @param[in] read_info Event info used for reading. Will be copied into the state.
+ * @param[in] parse_info Event info for parsing. Will be copied into the state.
+ * @param[out] error Pointer to the value set in case of an error. Optional. */
+UBJF_EXTERN void ubjf_init_read(ubjf_read_state *state,
+                                const ubjf_read_event_info *read_info,
+                                const ubjf_parse_event_info *parse_info,
+                                ubjf_error *error);
 /** Initializes an instance of `ubjf_read_state` for file reading.
  * @param[out] state State to initialize.
  * @param[in] file File to use for reading. Must be stored externally.
- * @param[in] callback_info Callbacks used for parsing. Will be copied into the state.
+ * @param[in] parse_info Event info used for parsing. Will be copied into the state.
  * @param[out] error Pointer to the value set in case of an error. Optional. */
 UBJF_EXTERN void ubjf_init_file_read(ubjf_read_state *state,
                                      FILE *file,
-                                     const ubjf_read_parse_callback_info *callback_info,
+                                     const ubjf_parse_event_info *parse_info,
                                      ubjf_error *error);
 /** De-initializes state previously initialized via `ubjf_init_file_read`.
  * @param[in] state State to destroy. */
@@ -86,18 +109,18 @@ UBJF_EXTERN void ubjf_destroy_file_read(ubjf_read_state *state);
  * @param[out] state State to initialize.
  * @param[in] buffer Buffer to UBJSON data to use for parsing.
  * @param[in] buffer_size Size of the data buffer in bytes.
- * @param[in] callback_info Callbacks used for parsing. Will be copied into the state.
+ * @param[in] parse_info Event info used for parsing. Will be copied into the state.
  * @param[out] error Pointer to the value set in case of an error. Optional. */
 UBJF_EXTERN void ubjf_init_buffer_read(ubjf_read_state *state,
                                        const void *buffer,
                                        size_t buffer_size,
-                                       const ubjf_read_parse_callback_info *callback_info,
+                                       const ubjf_parse_event_info *parse_info,
                                        ubjf_error *error);
 /** De-initializes state previously initialized via `ubjf_init_buffer_read`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
 
-/** Reads in next UBJSON node and invokes appropriate callbacks.
+/** Reads in next UBJSON node and invokes appropriate parse_events.
  * @param[in] state State to use for reading.
  * @param[out] error Pointer to the value set in case of an error. Optional.
  * @param[out] bytes Pointer to the value set to the amount of bytes read. Optional.

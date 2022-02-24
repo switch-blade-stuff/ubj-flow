@@ -18,6 +18,6 @@ typedef struct
 	void *buffer;
 	/** Work buffer size. */
 	size_t buffer_size;
-	/** User data passed to callbacks. */
+	/** User data passed to parse_events. */
 	void *udata;
 } ubjf_write_state;

@@ -10,16 +10,18 @@
 
 void test_error_msg();
 void test_parse_error();
+void test_parse_noop_array();
 void test_bool_parse();
+void test_parse_bool_array();
 void test_string_parse();
-void test_parse_noop();
 
 int main()
 {
 	test_error_msg();
 	test_parse_error();
-	test_parse_noop();
+	test_parse_noop_array();
 	test_bool_parse();
+	test_parse_bool_array();
 	test_string_parse();
 }
 
@@ -47,24 +49,24 @@ void test_error_msg()
 
 void test_parse_error()
 {
-	ubjf_read_parse_callback_info callback_info = {};
+	ubjf_parse_event_info event_info = {};
 	ubjf_read_state state;
 	ubjf_error error;
 	size_t bytes;
 
 	const char bad_data[8] = "bad data";
-	ubjf_init_buffer_read(&state, bad_data, sizeof(bad_data), &callback_info, &error);
+	ubjf_init_buffer_read(&state, bad_data, sizeof(bad_data), &event_info, &error);
 	assert(error == UBJF_NO_ERROR);
 	ubjf_read_next(&state, &error, &bytes);
 	assert(bytes == 1);
 	assert(error == UBJF_ERROR_BAD_DATA);
 	ubjf_destroy_buffer_read(&state);
 
-	ubjf_init_buffer_read(&state, NULL, 0, &callback_info, &error);
+	ubjf_init_buffer_read(&state, NULL, 0, &event_info, &error);
 	assert(error == UBJF_MAKE_PARAM_ERROR(1));
 
 	const char eof_data[1] = "U";
-	ubjf_init_buffer_read(&state, eof_data, sizeof(eof_data), &callback_info, &error);
+	ubjf_init_buffer_read(&state, eof_data, sizeof(eof_data), &event_info, &error);
 	assert(error == UBJF_NO_ERROR);
 	ubjf_read_next(&state, &error, &bytes);
 	assert(bytes == sizeof(eof_data));
@@ -72,26 +74,50 @@ void test_parse_error()
 	ubjf_destroy_buffer_read(&state);
 }
 
-ubjf_error test_noop_callback(size_t *noop_count)
+struct test_array_data
 {
-	++*noop_count;
+	bool started;
+	bool ended;
+	size_t count;
+};
+
+ubjf_error test_noop_event(struct test_array_data *data)
+{
+	data->count++;
 	return UBJF_NO_ERROR;
 }
-
-void test_parse_noop()
+ubjf_error test_noop_array_start_event(ubjf_type container_type,
+                                       int64_t fixed_size,
+                                       ubjf_type value_type,
+                                       struct test_array_data *data)
 {
-	const char data[18] = "NNNNNNNNNNNNNNNNNN";
+	data->started = true;
+	assert(container_type == UBJF_ARRAY);
+	assert(fixed_size != 0);
+	assert(value_type == 0);
+	return UBJF_NO_ERROR;
+}
+ubjf_error test_noop_array_end_event(struct test_array_data *data)
+{
+	data->ended = true;
+	return UBJF_NO_ERROR;
+}
+void test_parse_noop_array()
+{
+	const char data[22] = "[#i\022NNNNNNNNNNNNNNNNNN";
 
-	size_t count = 0;
-	ubjf_read_parse_callback_info callback_info = {
-			.on_noop = (ubjf_on_noop_func) test_noop_callback,
-			.udata = &count,
+	struct test_array_data event_data = {};
+	ubjf_parse_event_info event_info = {
+			.on_noop = (ubjf_on_noop_func) test_noop_event,
+			.on_container_begin = (ubjf_on_container_begin_func) test_noop_array_start_event,
+			.on_container_end = (ubjf_on_container_end_func) test_noop_array_end_event,
+			.udata = &event_data,
 	};
 	ubjf_read_state state;
 	ubjf_error error;
 	size_t bytes = 0;
 
-	ubjf_init_buffer_read(&state, data, sizeof(data), &callback_info, &error);
+	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
 	assert(error == UBJF_NO_ERROR);
 
 	for (size_t result = 0, consumed = 0; result != -1; result = ubjf_read_next(&state, &error, &consumed))
@@ -99,29 +125,83 @@ void test_parse_noop()
 
 	assert(error == UBJF_EOF);
 	assert(bytes == sizeof(data));
-	assert(count == sizeof(data));
+	assert(event_data.count == sizeof(data) - 4);
+	assert(event_data.started == true);
+	assert(event_data.ended == true);
 
 	ubjf_destroy_buffer_read(&state);
 }
 
-ubjf_error test_value_callback(ubjf_value value, ubjf_value *out_value)
+ubjf_error test_bool_event(ubjf_value value, struct test_array_data *data)
+{
+	assert(value.type & UBJF_BOOL_TYPE_MASK);
+	assert(value.boolean == true);
+	data->count++;
+	return UBJF_NO_ERROR;
+}
+ubjf_error test_bool_array_start_event(ubjf_type container_type,
+                                       int64_t fixed_size,
+                                       ubjf_type value_type,
+                                       struct test_array_data *data)
+{
+	data->started = true;
+	assert(container_type == UBJF_ARRAY);
+	assert(fixed_size != 0);
+	assert(value_type == UBJF_TRUE);
+	return UBJF_NO_ERROR;
+}
+ubjf_error test_bool_array_end_event(struct test_array_data *data)
+{
+	data->ended = true;
+	return UBJF_NO_ERROR;
+}
+void test_parse_bool_array()
+{
+	const char data[6] = "[$T#i\022";
+
+	struct test_array_data event_data = {};
+	ubjf_parse_event_info event_info = {
+			.on_value = (ubjf_on_value_func) test_bool_event,
+			.on_container_begin = (ubjf_on_container_begin_func) test_bool_array_start_event,
+			.on_container_end = (ubjf_on_container_end_func) test_bool_array_end_event,
+			.udata = &event_data,
+	};
+	ubjf_read_state state;
+	ubjf_error error;
+	size_t bytes = 0;
+
+	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
+	assert(error == UBJF_NO_ERROR);
+
+	for (size_t result = 0, consumed = 0; result != -1; result = ubjf_read_next(&state, &error, &consumed))
+		bytes += consumed;
+
+	assert(error == UBJF_EOF);
+	assert(bytes == sizeof(data));
+	assert(event_data.count == 18);
+	assert(event_data.started == true);
+	assert(event_data.ended == true);
+
+	ubjf_destroy_buffer_read(&state);
+}
+
+ubjf_error test_value_event(ubjf_value value, ubjf_value *out_value)
 {
 	*out_value = value;
 	return UBJF_NO_ERROR;
 }
-
 void test_bool_parse()
 {
 	const char data[1] = "T";
 	ubjf_value out;
 
-	ubjf_read_parse_callback_info callback_info = {
-			.on_value = (ubjf_on_value_func) test_value_callback,
+	ubjf_parse_event_info event_info = {
+			.on_value = (ubjf_on_value_func) test_value_event,
 			.udata = &out,
 	};
 	ubjf_read_state state;
 	ubjf_error error;
-	ubjf_init_buffer_read(&state, data, sizeof(data), &callback_info, &error);
+	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
 	assert(error == UBJF_NO_ERROR);
 
 	size_t bytes;
@@ -135,21 +215,20 @@ void test_bool_parse()
 	ubjf_destroy_buffer_read(&state);
 }
 
-char *test_string_callback(int64_t size, void *) { return malloc(size); }
-
+char *test_string_event(int64_t size, void *) { return malloc(size); }
 void test_string_parse()
 {
-	const char data[16] = "SI\014\00Hello, world";
+	const char data[18] = "Sl\014\00\00\00Hello, world";
 	ubjf_value out;
 
-	ubjf_read_parse_callback_info callback_info = {
-			.on_value = (ubjf_on_value_func) test_value_callback,
-			.on_string_alloc = test_string_callback,
+	ubjf_parse_event_info event_info = {
+			.on_value = (ubjf_on_value_func) test_value_event,
+			.on_string_alloc = test_string_event,
 			.udata = &out,
 	};
 	ubjf_read_state state;
 	ubjf_error error;
-	ubjf_init_buffer_read(&state, data, sizeof(data), &callback_info, &error);
+	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
 	assert(error == UBJF_NO_ERROR);
 
 	size_t bytes;
@@ -158,7 +237,7 @@ void test_string_parse()
 	assert(bytes == sizeof(data));
 	assert(error == UBJF_NO_ERROR);
 	assert(out.type == UBJF_STRING);
-	assert(strncmp(out.string, data + 4, 12) == 0);
+	assert(strncmp(out.string, data + 6, 12) == 0);
 
 	free((void *) out.string);
 	ubjf_destroy_buffer_read(&state);
