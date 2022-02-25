@@ -14,9 +14,10 @@
 typedef struct
 {
 	jmp_buf *panic_buf;
+	ubjf_error error;
 	ubjf_read_event_info read_info;
 	ubjf_parse_event_info parse_info;
-	ubjf_error error;
+	ubjf_highp_mode highp_mode;
 	size_t total_nodes;
 } ubjf_parse_ctx;
 
@@ -219,11 +220,11 @@ static void ubjf_parse_value(ubjf_parse_ctx *ctx, ubjf_type type)
 		ubjf_parse_string(ctx, &value);
 	else if (type == UBJF_TOKEN_HIGHP)
 	{
-		if (ctx->parse_info.highp_mode == UBJF_HIGHP_SKIP)
+		if (ctx->highp_mode == UBJF_HIGHP_SKIP)
 		{
 			ubjf_skip_highp(ctx);
 			return; /* Don't invoke value event  since wwe are skipping it. */
-		} else if (ctx->parse_info.highp_mode == UBJF_HIGHP_AS_STRING)
+		} else if (ctx->highp_mode == UBJF_HIGHP_AS_STRING)
 			ubjf_parse_string(ctx, &value);
 		else
 			THROW_ERROR(ctx->panic_buf, UBJF_ERROR_HIGHP);
@@ -360,9 +361,10 @@ ubjf_error ubjf_read_next(ubjf_read_state *restrict state, size_t *restrict node
 	ubjf_parse_ctx ctx = {
 			.panic_buf      = NULL,
 			.error          = UBJF_NO_ERROR,
+			.read_info      = state->read_event_info,
+			.parse_info     = state->parse_event_info,
+			.highp_mode     = state->highp_mode,
 			.total_nodes    = 0,
-			.read_info = state->read_event_info,
-			.parse_info = state->parse_event_info,
 	};
 
 	/* Do the actual reading. */

@@ -9,6 +9,7 @@
 #include "detail/define.h"
 #include "detail/error.h"
 #include "detail/value.h"
+#include "detail/config.h"
 
 typedef struct
 {
@@ -34,6 +35,17 @@ typedef struct
 
 typedef struct
 {
+	/** Events used for writing. */
+	ubjf_write_event_info write_event_info;
+	/** UBJson syntax to use for writing. */
+	ubjf_syntax syntax;
+} ubjf_write_state_info;
+
+typedef struct
+{
+	/** Syntax selector. */
+	ubjf_syntax syntax;
+
 	/** Stack of started container writes. */
 	ubjf_container_info *container_stack;
 	/** Pointer to the top of the container stack. */
@@ -45,28 +57,31 @@ typedef struct
 	ubjf_write_event_info write_event_info;
 } ubjf_write_state;
 
-/**  Initializes an instance of `ubjf_read_state` for write events.
+/** Initializes an instance of `ubjf_read_state` for write events.
  * @param[out] state State to initialize.
- * @param[in] write_info Event info used for reading.
+ * @param[in] init_info Data used to initialize the state.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_write(ubjf_write_state *state, ubjf_write_event_info write_info);
+UBJF_EXTERN ubjf_error ubjf_init_write(ubjf_write_state *state, ubjf_write_state_info init_info);
 /** Destroys a write state initialized with `ubjf_init_write`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_write(ubjf_write_state *state);
-/**  Initializes an instance of `ubjf_read_state` for file writing.
+/** Initializes an instance of `ubjf_read_state` for file writing.
  * @param[out] state State to initialize.
+ * @param[in] init_info Data used to initialize the state.
  * @param[in] file File to write to.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_file_write(ubjf_write_state *state, FILE *file);
+UBJF_EXTERN ubjf_error ubjf_init_file_write(ubjf_write_state *state, ubjf_write_state_info init_info, FILE *file);
 /** Destroys a write state initialized with `ubjf_init_file_write`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_file_write(ubjf_write_state *state);
-/**  Initializes an instance of `ubjf_read_state` for buffer writing.
+/** Initializes an instance of `ubjf_read_state` for buffer writing.
  * @param[out] state State to initialize.
+ * @param[in] init_info Data used to initialize the state.
  * @param[in] buffer Buffer to write to. Must be non-NULL.
  * @param[in] buffer_size Size of the output buffer. Must be non-0.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_buffer_write(ubjf_write_state *state, void *buffer, size_t buffer_size);
+UBJF_EXTERN ubjf_error ubjf_init_buffer_write(ubjf_write_state *state, ubjf_write_state_info init_info,
+                                              void *buffer, size_t buffer_size);
 /** Destroys a write state initialized with `ubjf_init_buffer_write`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_write(ubjf_write_state *state);

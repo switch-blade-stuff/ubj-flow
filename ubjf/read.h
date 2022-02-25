@@ -9,6 +9,7 @@
 #include "detail/define.h"
 #include "detail/error.h"
 #include "detail/value.h"
+#include "detail/config.h"
 
 typedef size_t (*ubjf_read_func)(void *dest, size_t n, void *udata);
 typedef int (*ubjf_peek_func)(void *udata);
@@ -36,22 +37,8 @@ typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type container_type, int
                                                    ubjf_type value_type, void *udata);
 typedef ubjf_error (*ubjf_on_container_end_func)(void *udata);
 
-typedef enum
-{
-	/** Return `UBJF_ERROR_HIGHP` error on high-precision values (this is the default behavior). */
-	UBJF_HIGHP_THROW = 0,
-	/** Skip high-precision values. */
-	UBJF_HIGHP_SKIP,
-	/** Parse high-precision values as strings. */
-	UBJF_HIGHP_AS_STRING,
-} ubjf_highp_mode;
-
 typedef struct
 {
-	/** High-precision number behavior toggle.
-	 * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`. */
-	ubjf_highp_mode highp_mode;
-
 	/** User data passed to parse parse_info. */
 	void *udata;
 	/** Function called when a value is parsed. */
@@ -69,6 +56,24 @@ typedef struct
 
 typedef struct
 {
+	/** Event info for read events. */
+	ubjf_read_event_info read_event_info;
+	/** Event info for parse events. */
+	ubjf_parse_event_info parse_event_info;
+	/** High-precision number behavior mode.
+ 	 * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`. */
+	ubjf_highp_mode highp_mode;
+	/** UBJson syntax to use for parsing. */
+	ubjf_syntax syntax;
+} ubjf_read_state_info;
+
+typedef struct
+{
+	/** Syntax selector. */
+	ubjf_syntax syntax;
+	/** High-precision number behavior selector. */
+	ubjf_highp_mode highp_mode;
+
 	/** Events used for reading. */
 	ubjf_read_event_info read_event_info;
 	/** Events used for parsing. */
@@ -77,34 +82,40 @@ typedef struct
 
 /** Initializes an instance of `ubjf_read_state` for custom events.
  * @param[out] state State to initialize.
- * @param[in] read_info Event info used for reading.
- * @param[in] parse_info Event info for parsing.
+ * @param[in] init_info Data used to initialize the state.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_read(ubjf_read_state *state, ubjf_read_event_info read_info,
-                                      ubjf_parse_event_info parse_info);
+UBJF_EXTERN ubjf_error ubjf_init_read(ubjf_read_state *state, ubjf_read_state_info init_info);
+/** Destroys state previously initialized via `ubjf_init_read`.
+ * @param[in] state State to destroy. */
+UBJF_EXTERN void ubjf_destroy_read(ubjf_read_state *state);
+
 /** Initializes an instance of `ubjf_read_state` for file reading.
  * @param[out] state State to initialize.
+ * @param[in] init_info Data used to initialize the state.
  * @param[in] file File to use for reading. Must be stored externally.
- * @param[in] parse_info Event info used for parsing.
- * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.*/
-UBJF_EXTERN ubjf_error ubjf_init_file_read(ubjf_read_state *state, FILE *file, ubjf_parse_event_info parse_info);
-/** De-initializes state previously initialized via `ubjf_init_file_read`.
+ * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`.
+ * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
+ * @note Read events will be initialized automatically. */
+UBJF_EXTERN ubjf_error ubjf_init_file_read(ubjf_read_state *state, ubjf_read_state_info init_info, FILE *file);
+/** Destroys state previously initialized via `ubjf_init_file_read`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_file_read(ubjf_read_state *state);
 
 /** Initializes an instance of `ubjf_read_state` for buffer reading.
  * @param[out] state State to initialize.
- * @param[in] buffer Buffer containing UBJSON data to use for parsing. Must be non-NULL.
+ * @param[in] init_info Data used to initialize the state.
+ * @param[in] buffer Buffer containing UBJson data to use for parsing. Must be non-NULL.
  * @param[in] buffer_size Size of the data buffer in bytes. Must be non-0.
- * @param[in] parse_info Event info used for parsing.
- * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_buffer_read(ubjf_read_state *state, const void *buffer, size_t buffer_size,
-                                             ubjf_parse_event_info parse_info);
-/** De-initializes state previously initialized via `ubjf_init_buffer_read`.
+ * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`.
+ * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
+ * @note Read events will be initialized automatically. */
+UBJF_EXTERN ubjf_error ubjf_init_buffer_read(ubjf_read_state *state, ubjf_read_state_info init_info,
+                                             const void *buffer, size_t buffer_size);
+/** Destroys state previously initialized via `ubjf_init_buffer_read`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
 
-/** Reads in next UBJSON node and invokes appropriate parse_info.
+/** Reads in next UBJson node and invokes appropriate parse_info.
  * @param[in] state State to use for reading.
  * @param[out] nodes Pointer to the value set to the amount of nodes processed. Optional.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
