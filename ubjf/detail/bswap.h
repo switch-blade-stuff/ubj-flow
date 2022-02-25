@@ -51,13 +51,14 @@
 #endif
 
 #ifndef bswap_16
-#define bswap_16(value)                         \
-	do {                                        \
-		uint8_t *data = (uint8_t *) &(value);   \
-		uint8_t temp = data[1];                 \
-		data[1] = data[0];                      \
-		data[0] = temp;                         \
-	} while (0)
+static inline bswap_16(uint16_t value)
+{
+	uint8_t *data = (uint8_t *) &(value);
+	uint8_t temp = data[1];
+	data[1] = data[0];
+	data[0] = temp;
+	return value;
+}
 #endif
 
 #endif
@@ -68,7 +69,7 @@
 #define FIX_ENDIANNESS_32(value) bswap_32(value)
 #define FIX_ENDIANNESS_64(value) bswap_64(value)
 #else
-#define FIX_ENDIANNESS_16(...)
-#define FIX_ENDIANNESS_32(...)
-#define FIX_ENDIANNESS_64(...)
+#define FIX_ENDIANNESS_16(value) value
+#define FIX_ENDIANNESS_32(value) value
+#define FIX_ENDIANNESS_64(value) value
 #endif

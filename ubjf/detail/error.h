@@ -19,6 +19,8 @@ typedef enum
 	UBJF_ERROR_BAD_TYPE,
 	/** Unknown error. */
 	UBJF_ERROR_UNKNOWN,
+	/** High precision number support is not enabled. */
+	UBJF_ERROR_HIGHP,
 
 	/** Passed parameter is invalid. Use `UBJF_IS_PARAM_ERROR` to check if an error is parameter error. */
 	UBJF_ERROR_PARAM = 1 << 8, /* Index of the bad parameter stored as bottom 8 bits. */

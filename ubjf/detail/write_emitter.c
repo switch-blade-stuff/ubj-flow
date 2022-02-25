@@ -10,38 +10,6 @@
 #include "token.h"
 #include "bswap.h"
 
-ubjf_error ubjf_write_array(ubjf_write_state *state, const ubjf_value *data, int64_t n)
-{
-#ifndef UBJF_DISABLE_CHECKS
-	if (UBJF_UNLIKELY(!state))
-		return UBJF_MAKE_PARAM_ERROR(0);
-	else if (UBJF_UNLIKELY(!data))
-		return UBJF_MAKE_PARAM_ERROR(1);
-	else if (UBJF_UNLIKELY(n < 0))
-		return UBJF_MAKE_PARAM_ERROR(2);
-#endif
-
-	ubjf_container_info info = {
-			.container_type = UBJF_ARRAY,
-			.length = n,
-			.value_type = UBJF_NO_TYPE,
-	};
-
-	ubjf_error result = ubjf_start_container(state, info);
-	if (UBJF_UNLIKELY(result != UBJF_NO_ERROR))
-		return result;
-
-	for (int64_t i = 0; i < n; ++i)
-	{
-		result = ubjf_write_value(state, data[i]);
-		if (UBJF_UNLIKELY(result != UBJF_NO_ERROR))
-			return result;
-	}
-
-	/* If got here, the only error can be returned by `ubjf_end_container`. */
-	return ubjf_end_container(state);
-}
-
 static const ubjf_token ubjf_type_token_map[] = {
 		[UBJF_NULL]         = UBJF_TOKEN_NULL,
 		[UBJF_NOOP]         = UBJF_TOKEN_NOOP,
@@ -100,22 +68,19 @@ static void ubjf_emit_integer(ubjf_emit_ctx *ctx, ubjf_value value)
 		}
 		case UBJF_INT16:
 		{
-			int16_t temp = value.int16;
-			FIX_ENDIANNESS_16(temp);
+			int16_t temp = FIX_ENDIANNESS_16(value.int16);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT32:
 		{
-			int32_t temp = value.int32;
-			FIX_ENDIANNESS_32(temp);
+			int32_t temp = FIX_ENDIANNESS_32(value.int32);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT64:
 		{
-			int64_t temp = value.int64;
-			FIX_ENDIANNESS_64(temp);
+			int64_t temp = FIX_ENDIANNESS_64(value.int64);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
@@ -129,15 +94,13 @@ static void ubjf_emit_float(ubjf_emit_ctx *ctx, ubjf_value value)
 	{
 		case UBJF_FLOAT32:
 		{
-			float temp = value.float32;
-			FIX_ENDIANNESS_32(temp);
+			float temp = FIX_ENDIANNESS_32(value.float32);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
-			double temp = value.float64;
-			FIX_ENDIANNESS_64(temp);
+			double temp = FIX_ENDIANNESS_64(value.float64);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
@@ -184,8 +147,10 @@ ubjf_error ubjf_write_value(ubjf_write_state *state, ubjf_value value)
 	GUARD_ERROR(ctx.panic_buf, ctx.error)
 	{
 		/* Don't emit type token if we are within a fixed-type container. */
-		if (!state->current_container || state->current_container->container_type != UBJF_NO_TYPE)
+		if (!state->current_container || state->current_container->value_type == UBJF_NO_TYPE)
 			ubjf_emit_type_token(&ctx, value);
+		else if (UBJF_UNLIKELY(state->current_container->value_type != value.type))
+			THROW_ERROR(ctx.panic_buf, UBJF_ERROR_BAD_TYPE); /* Make sure value type matches the fixed type. */
 
 		if (value.type & UBJF_INTEGER_TYPE_MASK)
 			ubjf_emit_integer(&ctx, value);
@@ -318,4 +283,36 @@ ubjf_error ubjf_end_container(ubjf_write_state *state)
 
 	ubjf_pop_info(state);
 	return UBJF_NO_ERROR;
+}
+
+ubjf_error ubjf_write_array(ubjf_write_state *state, const ubjf_value *data, int64_t n, ubjf_type value_type)
+{
+#ifndef UBJF_DISABLE_CHECKS
+	if (UBJF_UNLIKELY(!state))
+		return UBJF_MAKE_PARAM_ERROR(0);
+	else if (UBJF_UNLIKELY(!data))
+		return UBJF_MAKE_PARAM_ERROR(1);
+	else if (UBJF_UNLIKELY(n < 0))
+		return UBJF_MAKE_PARAM_ERROR(2);
+#endif
+
+	ubjf_container_info info = {
+			.container_type = UBJF_ARRAY,
+			.length = n,
+			.value_type = value_type,
+	};
+
+	ubjf_error result = ubjf_start_container(state, info);
+	if (UBJF_UNLIKELY(result != UBJF_NO_ERROR))
+		return result;
+
+	for (int64_t i = 0; i < n; ++i)
+	{
+		result = ubjf_write_value(state, data[i]);
+		if (UBJF_UNLIKELY(result != UBJF_NO_ERROR))
+			return result;
+	}
+
+	/* If got here, the only error can be returned by `ubjf_end_container`. */
+	return ubjf_end_container(state);
 }

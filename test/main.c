@@ -18,6 +18,7 @@ void test_parse_string_array();
 
 void test_write_string();
 void test_write_bool_array();
+void test_write_int_array();
 
 int main()
 {
@@ -33,6 +34,7 @@ int main()
 
 	test_write_string();
 	test_write_bool_array();
+	test_write_int_array();
 }
 
 void test_error_msg()
@@ -236,6 +238,34 @@ void test_write_bool_array()
 	};
 	assert(ubjf_start_container(&state, info) == UBJF_NO_ERROR);
 	assert(ubjf_end_container(&state) == UBJF_NO_ERROR);
+	assert(strncmp(buffer, expected, sizeof(expected)) == 0);
+
+	ubjf_destroy_buffer_write(&state);
+}
+
+
+void test_write_int_array()
+{
+	const char expected[22] = "[$I#i\x08"
+	                          "\xaa\xbb\xaa\xbb\xaa\xbb\xaa\xbb"
+	                          "\xaa\xbb\xaa\xbb\xaa\xbb\xaa\xbb";
+	char buffer[sizeof(expected)] = {0};
+
+	const ubjf_value data[8] = {
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+	};
+
+	ubjf_write_state state;
+	assert(ubjf_init_buffer_write(&state, buffer, sizeof(buffer)) == UBJF_NO_ERROR);
+
+	assert(ubjf_write_array(&state, data, 8, UBJF_INT16) == UBJF_NO_ERROR);
 	assert(strncmp(buffer, expected, sizeof(expected)) == 0);
 
 	ubjf_destroy_buffer_write(&state);

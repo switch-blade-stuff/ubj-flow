@@ -52,11 +52,19 @@ static char ubjf_guarded_peek(ubjf_parse_ctx *ctx)
 		THROW_ERROR(ctx->panic_buf, UBJF_EOF);
 	return (char) result;
 }
-static void ubjf_guarded_bump(ubjf_parse_ctx *ctx)
+static void ubjf_guarded_bump(ubjf_parse_ctx *ctx, size_t n)
 {
-	if (UBJF_UNLIKELY(!(ctx->read_info.bump && ctx->read_info.bump(1, ctx->read_info.udata))))
+	if (UBJF_UNLIKELY(!(ctx->read_info.bump && ctx->read_info.bump(n, ctx->read_info.udata))))
 		THROW_ERROR(ctx->panic_buf, UBJF_EOF);
 }
+
+static ubjf_token ubjf_read_token(ubjf_parse_ctx *ctx)
+{
+	ubjf_token token = 0;
+	ubjf_guarded_read(ctx, &token, 1);
+	return token;
+}
+static ubjf_token ubjf_peek_token(ubjf_parse_ctx *ctx) { return (ubjf_token) ubjf_guarded_peek(ctx); }
 
 /* Parse event invocation. */
 static void ubjf_invoke_on_value(ubjf_parse_ctx *ctx, ubjf_value value)
@@ -120,24 +128,21 @@ static void ubjf_parse_integer(ubjf_parse_ctx *restrict ctx, ubjf_value *restric
 		{
 			int16_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			FIX_ENDIANNESS_16(temp);
-			value->int16 = temp;
+			value->int16 = FIX_ENDIANNESS_16(temp);
 			break;
 		}
 		case UBJF_INT32:
 		{
 			int32_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			FIX_ENDIANNESS_32(temp);
-			value->int32 = temp;
+			value->int32 = FIX_ENDIANNESS_32(temp);
 			break;
 		}
 		case UBJF_INT64:
 		{
 			int64_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			FIX_ENDIANNESS_64(temp);
-			value->int64 = temp;
+			value->int64 = FIX_ENDIANNESS_64(temp);
 			break;
 		}
 	}
@@ -150,27 +155,23 @@ static void ubjf_parse_float(ubjf_parse_ctx *restrict ctx, ubjf_value *restrict 
 		{
 			float temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			FIX_ENDIANNESS_32(temp);
-			value->float32 = temp;
+			value->float32 = FIX_ENDIANNESS_32(temp);
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
 			double temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			FIX_ENDIANNESS_64(temp);
-			value->float64 = temp;
+			value->float64 = FIX_ENDIANNESS_64(temp);
 			break;
 		}
 	}
 }
 static int64_t ubjf_parse_length(ubjf_parse_ctx *ctx)
 {
-	ubjf_value length = {.type = ubjf_token_type_map[(ubjf_token) ubjf_guarded_peek(ctx)]};
+	ubjf_value length = {.type = ubjf_token_type_map[ubjf_read_token(ctx)]};
 	if (UBJF_UNLIKELY(!(length.type & UBJF_INTEGER_TYPE_MASK)))
 		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_DATA);
-	else
-		ubjf_guarded_bump(ctx);
 
 	/* Read the length and make sure it is within i64 range.
 	 * Since all integer values are stored in a union,
@@ -198,6 +199,11 @@ static void ubjf_parse_string(ubjf_parse_ctx *restrict ctx, ubjf_value *restrict
 	value->string.data = str;
 	value->string.size = length;
 }
+static void ubjf_skip_highp(ubjf_parse_ctx *ctx)
+{
+	int64_t length = ubjf_parse_length(ctx);
+	ubjf_guarded_bump(ctx, length);
+}
 static void ubjf_parse_value(ubjf_parse_ctx *ctx, ubjf_type type)
 {
 	ubjf_value value = {.type = type};
@@ -209,8 +215,19 @@ static void ubjf_parse_value(ubjf_parse_ctx *ctx, ubjf_type type)
 		ubjf_parse_integer(ctx, &value);
 	else if (type & UBJF_FLOAT_TYPE_MASK)
 		ubjf_parse_float(ctx, &value);
-	else if (type == UBJF_TOKEN_STRING || type == UBJF_TOKEN_HIGHP) /* Both are stored in the same format. */
+	else if (type == UBJF_TOKEN_STRING)
 		ubjf_parse_string(ctx, &value);
+	else if (type == UBJF_TOKEN_HIGHP)
+	{
+		if (ctx->parse_info.highp_mode == UBJF_HIGHP_SKIP)
+		{
+			ubjf_skip_highp(ctx);
+			return; /* Don't invoke value event  since wwe are skipping it. */
+		} else if (ctx->parse_info.highp_mode == UBJF_HIGHP_AS_STRING)
+			ubjf_parse_string(ctx, &value);
+		else
+			THROW_ERROR(ctx->panic_buf, UBJF_ERROR_HIGHP);
+	}
 
 	ubjf_invoke_on_value(ctx, value);
 }
@@ -227,16 +244,15 @@ static void ubjf_parse_array(ubjf_parse_ctx *ctx, int64_t length, ubjf_type valu
 {
 	if (length >= 0)
 		while (length-- > 0)
+		{
 			ubjf_parse_sized_container_next(ctx, value_type);
+		}
 	else
 		for (;;)
 		{
-			ubjf_token token = (ubjf_token) ubjf_guarded_peek(ctx);
+			ubjf_token token = ubjf_read_token(ctx);
 			if (token == UBJF_TOKEN_ARRAY_END)
-			{
-				ubjf_guarded_bump(ctx);
 				break;
-			}
 
 			/* Expect that it is a value token. */
 			ubjf_type type = ubjf_token_type_map[token];
@@ -259,7 +275,7 @@ static void ubjf_parse_object(ubjf_parse_ctx *ctx, int64_t length, ubjf_type val
 		{
 			if (ubjf_guarded_peek(ctx) == UBJF_TOKEN_OBJECT_END)
 			{
-				ubjf_guarded_bump(ctx);
+				ubjf_guarded_bump(ctx, 1);
 				break;
 			}
 
@@ -272,26 +288,24 @@ static void ubjf_parse_container_preface(ubjf_parse_ctx *restrict ctx,
                                          int64_t *restrict out_length,
                                          ubjf_type *restrict out_value_type)
 {
-	switch ((ubjf_token) ubjf_guarded_peek(ctx))
+	switch (ubjf_peek_token(ctx))
 	{
 		case UBJF_TOKEN_CONTAINER_TYPE:
 		{
 			/* If explicit type is specified, read the type, then read the length. */
-			ubjf_guarded_bump(ctx);
+			ubjf_guarded_bump(ctx, 1);
 
-			*out_value_type = ubjf_token_type_map[ubjf_guarded_peek(ctx)];
+			*out_value_type = ubjf_token_type_map[ubjf_read_token(ctx)];
 			if (UBJF_UNLIKELY(*out_value_type == UBJF_NO_TYPE))
 				THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_DATA);
-			else
-				ubjf_guarded_bump(ctx);
 
 			/* For strongly typed containers, length always follows the type. */
-			if (UBJF_UNLIKELY((ubjf_token) ubjf_guarded_peek(ctx) != UBJF_TOKEN_CONTAINER_LENGTH))
+			if (UBJF_UNLIKELY(ubjf_peek_token(ctx) != UBJF_TOKEN_CONTAINER_LENGTH))
 				THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_DATA);
 		}
 		case UBJF_TOKEN_CONTAINER_LENGTH:
 		{
-			ubjf_guarded_bump(ctx);
+			ubjf_guarded_bump(ctx, 1);
 			*out_length = ubjf_parse_length(ctx);
 		}
 		default:
@@ -329,12 +343,10 @@ static void ubjf_parse_node(ubjf_parse_ctx *ctx, ubjf_type type)
 }
 static void ubjf_read_node_recursive(ubjf_parse_ctx *ctx)
 {
-	ubjf_type type = ubjf_token_type_map[(ubjf_token) ubjf_guarded_peek(ctx)];
+	ubjf_type type = ubjf_token_type_map[ubjf_read_token(ctx)];
 	if (UBJF_UNLIKELY(type == UBJF_NO_TYPE))
 		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_DATA);
 
-	/* Peek returned a valid type token, consume it and parse the node. */
-	ubjf_guarded_bump(ctx);
 	ubjf_parse_node(ctx, type);
 }
 

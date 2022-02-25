@@ -36,8 +36,22 @@ typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type container_type, int
                                                    ubjf_type value_type, void *udata);
 typedef ubjf_error (*ubjf_on_container_end_func)(void *udata);
 
+typedef enum
+{
+	/** Return `UBJF_ERROR_HIGHP` error on high-precision values (this is the default behavior). */
+	UBJF_HIGHP_THROW = 0,
+	/** Skip high-precision values. */
+	UBJF_HIGHP_SKIP,
+	/** Parse high-precision values as strings. */
+	UBJF_HIGHP_AS_STRING,
+} ubjf_highp_mode;
+
 typedef struct
 {
+	/** High-precision number behavior toggle.
+	 * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`. */
+	ubjf_highp_mode highp_mode;
+
 	/** User data passed to parse parse_info. */
 	void *udata;
 	/** Function called when a value is parsed. */

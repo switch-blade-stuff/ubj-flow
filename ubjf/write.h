@@ -214,5 +214,8 @@ UBJF_EXTERN ubjf_error ubjf_end_container(ubjf_write_state *state);
  * @param[in] state State to use for writing.
  * @param[in] data Data of the array.
  * @param[in] n Size of the array.
- * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_write_array(ubjf_write_state *state, const ubjf_value *data, int64_t n);
+ * @param[in] value_type Optional fixed type for the array.
+ * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
+ * @note If a fixed type is specified, every value within the source array must be of the same type. */
+UBJF_EXTERN ubjf_error ubjf_write_array(ubjf_write_state *state, const ubjf_value *data, int64_t n,
+                                        ubjf_type value_type);

@@ -43,6 +43,8 @@ const char *ubjf_make_error_msg(ubjf_error err)
 				return strcpy(UBJF_MALLOC(14), "Unknown error");
 			case UBJF_ERROR_BAD_TYPE:
 				return strcpy(UBJF_MALLOC(13), "Invalid type");
+			case UBJF_ERROR_HIGHP:
+				return strcpy(UBJF_MALLOC(36), "High precision numbers are disabled");
 			default:
 				return NULL;
 		}
