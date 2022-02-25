@@ -30,5 +30,5 @@ typedef enum
 	UBJF_TOKEN_CONTAINER_SIZE = '#',
 
 	UBJF_TOKEN_COUNT,
-	UBJF_TOKEN_MAX = UINT8_MAX,
+	UBJF_TOKEN_MAX = INT8_MAX,
 } ubjf_token;

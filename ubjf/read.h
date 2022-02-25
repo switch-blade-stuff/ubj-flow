@@ -4,13 +4,11 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #include "detail/define.h"
 #include "detail/error.h"
-#include "detail/type.h"
+#include "detail/value.h"
 
 typedef size_t (*ubjf_read_func)(void *dest, size_t n, void *udata);
 typedef int (*ubjf_peek_func)(void *udata);
@@ -28,51 +26,30 @@ typedef struct
 	ubjf_peek_func peek;
 } ubjf_read_event_info;
 
-typedef struct
-{
-	ubjf_type type;
-	union
-	{
-		bool boolean;
-		char character;
-		int8_t int8;
-		uint8_t uint8;
-		int16_t int16;
-		int32_t int32;
-		int64_t int64;
-		float float32;
-		double float64;
-		const char *highp;
-		const char *string;
-	};
-} ubjf_value;
-
-typedef ubjf_error (*ubjf_on_noop_func)(void *udata);
 typedef ubjf_error (*ubjf_on_value_func)(ubjf_value value, void *udata);
 typedef char *(*ubjf_on_string_alloc_func)(size_t length, void *udata);
 
-typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type container_type,
-                                                   int64_t fixed_size,
-                                                   ubjf_type value_type,
-                                                   void *udata);
-typedef void (*ubjf_on_container_end_func)(void *udata);
+typedef ubjf_error (*ubjf_on_container_begin_func)(ubjf_type container_type, int64_t fixed_size,
+                                                   ubjf_type value_type, void *udata);
+typedef ubjf_error (*ubjf_on_container_end_func)(void *udata);
+typedef void (*ubjf_on_error_func)(ubjf_error error, void *udata);
 
 typedef struct
 {
-	/** User data passed to parse parse_event_info. */
+	/** User data passed to parse parse_info. */
 	void *udata;
-	/** Function called when a noop is parsed. */
-	ubjf_on_noop_func on_noop;
 	/** Function called when a value is parsed. */
 	ubjf_on_value_func on_value;
-	/** Function called when a string is allocated. */
+	/** Function called when a string (for a string or a high-precision number value) is allocated. */
 	ubjf_on_string_alloc_func on_string_alloc;
+	/** Function called when a string parse cannot be completed due to an error. */
+	ubjf_on_error_func on_string_error;
 	/** Function called when a container parse is started. */
 	ubjf_on_container_begin_func on_container_begin;
 	/** Function called when a container parse is finished. */
 	ubjf_on_container_end_func on_container_end;
 	/** Function called when a container parse cannot be completed due to an error. */
-	ubjf_on_container_end_func on_container_error;
+	ubjf_on_error_func on_container_error;
 } ubjf_parse_event_info;
 
 typedef struct
@@ -113,7 +90,7 @@ UBJF_EXTERN void ubjf_init_buffer_read(ubjf_read_state *state, const void *buffe
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
 
-/** Reads in next UBJSON node and invokes appropriate parse_event_info.
+/** Reads in next UBJSON node and invokes appropriate parse_info.
  * @param[in] state State to use for reading.
  * @param[out] error Pointer to the value set in case of an error. Optional.
  * @param[out] nodes Pointer to the value set to the amount of nodes processed. Optional.
