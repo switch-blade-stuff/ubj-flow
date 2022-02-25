@@ -26,20 +26,26 @@ static const char *format_param_error(uint8_t idx)
 
 const char *ubjf_make_error_msg(ubjf_error err)
 {
-	const char *msg = NULL;
-	if (err == UBJF_ERROR_ALLOC)
-		msg = alloc_error_msg;
-	else if (err == UBJF_EOF)
-		msg = strcpy(UBJF_MALLOC(13), "End of input");
-	else if (err == UBJF_ERROR_BAD_WRITE)
-		msg = strcpy(UBJF_MALLOC(26), "Failed to write to output");
-	else if (err == UBJF_ERROR_BAD_DATA)
-		msg = strcpy(UBJF_MALLOC(16), "Failed to parse");
-	else if (err == UBJF_ERROR_UNKNOWN)
-		msg = strcpy(UBJF_MALLOC(14), "Unknown error");
-	else if (err & UBJF_ERROR_PARAM)
-		msg = format_param_error(UBJF_PARAM_ERROR_GET_INDEX(err));
-	return msg;
+	if (UBJF_IS_PARAM_ERROR(err))
+		return format_param_error(UBJF_PARAM_ERROR_GET_INDEX(err));
+	else
+		switch (err)
+		{
+			case UBJF_ERROR_ALLOC:
+				return alloc_error_msg;
+			case UBJF_EOF:
+				return strcpy(UBJF_MALLOC(13), "End of input");
+			case UBJF_ERROR_BAD_WRITE:
+				return strcpy(UBJF_MALLOC(26), "Failed to write to output");
+			case UBJF_ERROR_BAD_DATA:
+				return strcpy(UBJF_MALLOC(16), "Failed to parse");
+			case UBJF_ERROR_UNKNOWN:
+				return strcpy(UBJF_MALLOC(14), "Unknown error");
+			case UBJF_ERROR_BAD_TYPE:
+				return strcpy(UBJF_MALLOC(13), "Invalid type");
+			default:
+				return NULL;
+		}
 }
 void ubjf_free_error_message(const char *msg)
 {

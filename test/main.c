@@ -16,8 +16,13 @@ void test_parse_bool_array();
 void test_string_parse();
 void test_parse_string_array();
 
+void test_write_string();
+void test_write_bool_array();
+
 int main()
 {
+	int i = sizeof(ubjf_container_info);
+
 	test_error_msg();
 	test_parse_error();
 	//test_bool_parse();
@@ -25,6 +30,9 @@ int main()
 	test_parse_noop_array();
 	test_parse_bool_array();
 	//test_parse_string_array();
+
+	test_write_string();
+	test_write_bool_array();
 }
 
 void test_error_msg()
@@ -52,25 +60,21 @@ void test_error_msg()
 void test_parse_error()
 {
 	ubjf_read_state state;
-	ubjf_error error;
+	ubjf_parse_event_info info = {};
 
 	{
-		ubjf_init_buffer_read(&state, NULL, 0, NULL, &error);
-		assert(error & UBJF_PARAM_ERROR_MASK);
+		ubjf_error error = ubjf_init_buffer_read(&state, NULL, 0, info);
+		assert(UBJF_IS_PARAM_ERROR(error));
 		assert(UBJF_PARAM_ERROR_GET_INDEX(error) == 1);
-		ubjf_destroy_buffer_read(&state);
+		//ubjf_destroy_buffer_read(&state);
 	}
 
 	{
 		const char bad_data[8] = "bad_data";
-		ubjf_parse_event_info event_info = {};
 		size_t nodes = 0;
 
-		ubjf_init_buffer_read(&state, bad_data, sizeof(bad_data), &event_info, &error);
-		assert(error == UBJF_NO_ERROR);
-
-		assert(ubjf_read_next(&state, &error, &nodes) == 1);
-		assert(error == UBJF_ERROR_BAD_DATA);
+		assert(ubjf_init_buffer_read(&state, bad_data, sizeof(bad_data), info) == UBJF_NO_ERROR);
+		assert(ubjf_read_next(&state, &nodes) == UBJF_ERROR_BAD_DATA);
 
 		ubjf_destroy_buffer_read(&state);
 	}
@@ -117,7 +121,6 @@ void test_parse_noop_array()
 	const char data[] = "[$N#i\x0f";
 
 	ubjf_read_state state;
-	ubjf_error error;
 	size_t nodes_read;
 
 	test_parse_noop_ctx ctx = {};
@@ -128,11 +131,9 @@ void test_parse_noop_array()
 			.on_container_end = (ubjf_on_container_end_func) test_parse_noop_array_on_container_end,
 	};
 
-	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
-	assert(error == UBJF_NO_ERROR);
+	assert(ubjf_init_buffer_read(&state, data, sizeof(data), event_info) == UBJF_NO_ERROR);
 
-	ubjf_read_next(&state, &error, &nodes_read);
-	assert(error == UBJF_NO_ERROR);
+	assert(ubjf_read_next(&state, &nodes_read) == UBJF_NO_ERROR);
 	assert(ctx.started);
 	assert(ctx.ended);
 	assert(ctx.value_type == UBJF_NOOP);
@@ -163,7 +164,7 @@ static ubjf_error test_parse_bool_array_on_container_begin(ubjf_type container_t
 	ctx->started = true;
 	assert(container_type == UBJF_ARRAY);
 	assert((ctx->array_size = fixed_size) != 0);
-	assert(value_type == UBJF_BAD_TYPE);
+	assert(value_type == UBJF_NO_TYPE);
 	return UBJF_NO_ERROR;
 }
 static ubjf_error test_parse_bool_array_on_container_end(test_parse_bool_ctx *ctx)
@@ -188,11 +189,9 @@ void test_parse_bool_array()
 			.on_container_end = (ubjf_on_container_end_func) test_parse_bool_array_on_container_end,
 	};
 
-	ubjf_init_buffer_read(&state, data, sizeof(data), &event_info, &error);
-	assert(error == UBJF_NO_ERROR);
+	assert(ubjf_init_buffer_read(&state, data, sizeof(data), event_info) == UBJF_NO_ERROR);
 
-	ubjf_read_next(&state, &error, &nodes_read);
-	assert(error == UBJF_NO_ERROR);
+	assert(ubjf_read_next(&state, &nodes_read) == UBJF_NO_ERROR);
 	assert(ctx.started);
 	assert(ctx.ended);
 	assert(ctx.bool_count == 0xf);
@@ -203,3 +202,41 @@ void test_parse_bool_array()
 }
 
 void test_parse_string_array();
+
+void test_write_string()
+{
+	const char expected[15] = "Si\x0cHello, world";
+	char buffer[sizeof(expected)] = {0};
+
+	ubjf_write_state state;
+	assert(ubjf_init_buffer_write(&state, buffer, sizeof(buffer)) == UBJF_NO_ERROR);
+
+	ubjf_string str = {
+			.size = 12,
+			.data = "Hello, world",
+	};
+	assert(ubjf_write_string(&state, str) == UBJF_NO_ERROR);
+	assert(strncmp(buffer, expected, 12) == 0);
+
+	ubjf_destroy_buffer_write(&state);
+}
+
+void test_write_bool_array()
+{
+	const char expected[6] = "[$T#U\xff";
+	char buffer[sizeof(expected)] = {0};
+
+	ubjf_write_state state;
+	assert(ubjf_init_buffer_write(&state, buffer, sizeof(buffer)) == UBJF_NO_ERROR);
+
+	ubjf_container_info info = {
+			.container_type = UBJF_ARRAY,
+			.length = 0xff,
+			.value_type = UBJF_TRUE_TYPE,
+	};
+	assert(ubjf_start_container(&state, info) == UBJF_NO_ERROR);
+	assert(ubjf_end_container(&state) == UBJF_NO_ERROR);
+	assert(strncmp(buffer, expected, sizeof(expected)) == 0);
+
+	ubjf_destroy_buffer_write(&state);
+}

@@ -7,7 +7,14 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 include(GenerateExportHeader)
 
-add_library(${PROJECT_NAME} SHARED)
+option(UBJF_BUILD_SHARED "Enables shared library build" ON)
+if (UBJF_BUILD_SHARED)
+    set(BUILD_SHARED_LIBS ON)
+else ()
+    set(BUILD_SHARED_LIBS OFF)
+endif ()
+
+add_library(${PROJECT_NAME})
 
 option(UBJF_BIG_ENDIAN "Tells the library that the architecture is big-endian. By default, little-endian architectures are assumed." OFF)
 if (UBJF_BIG_ENDIAN)

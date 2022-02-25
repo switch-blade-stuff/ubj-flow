@@ -24,6 +24,6 @@
 #define UBJF_LIKELY(x)       __builtin_expect(!!(x),1)
 #define UBJF_UNLIKELY(x)     __builtin_expect(!!(x),0)
 #else
-#define UBJF_LIKELY(x)
-#define UBJF_UNLIKELY(x)
+#define UBJF_LIKELY(x) x
+#define UBJF_UNLIKELY(x) x
 #endif

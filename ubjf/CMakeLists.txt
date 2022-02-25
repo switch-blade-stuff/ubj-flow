@@ -19,4 +19,6 @@ target_sources(${PROJECT_NAME} INTERFACE
 target_sources(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/detail/error.c
         ${CMAKE_CURRENT_LIST_DIR}/detail/read_init.c
-        ${CMAKE_CURRENT_LIST_DIR}/detail/read_parser.c)
+        ${CMAKE_CURRENT_LIST_DIR}/detail/read_parser.c
+        ${CMAKE_CURRENT_LIST_DIR}/detail/write_init.c
+        ${CMAKE_CURRENT_LIST_DIR}/detail/write_emitter.c)

@@ -11,7 +11,9 @@
 
 typedef struct
 {
-	size_t size;
+	/** Size of the string (excluding the null terminator). */
+	int64_t size;
+	/** Data of the string. */
 	const char *data;
 } ubjf_string;
 
