@@ -29,7 +29,12 @@ string serialization and when value or container nodes are parsed.
 This library does not claim to be and will never be a complete standalone UBJSON serialization implementation. It is
 only meant to be
 
-### UBJSON compatibility
+### UBJson compatibility
 
 This library is compatible with the current (as of February 2022) version of UBJson (spec 12).
+
+Once further UBJson syntax standards are released, it will be possible to select target syntax via a syntax toggle. For
+now, however, only spec 12 is supported.
+
+Supporting multiple revisions will most likely require a rewrite and a change in internal architecture and/or ABI.
 
