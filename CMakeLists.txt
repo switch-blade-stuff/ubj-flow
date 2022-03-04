@@ -36,7 +36,8 @@ endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/ubjf/CMakeLists.txt)
 
-add_subdirectory(test)
-
 # TODO: Add install target
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    add_subdirectory(test)
+endif ()

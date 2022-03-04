@@ -51,19 +51,19 @@ static void ubjf_s12_emit_integer(ubjf_emit_ctx *ctx, ubjf_value value)
 		}
 		case UBJF_INT16:
 		{
-			int16_t temp = FIX_ENDIANNESS_16(value.int16);
+			int16_t temp = FIX_ENDIANNESS_16_BE(value.int16);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT32:
 		{
-			int32_t temp = FIX_ENDIANNESS_32(value.int32);
+			int32_t temp = FIX_ENDIANNESS_32_BE(value.int32);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT64:
 		{
-			int64_t temp = FIX_ENDIANNESS_64(value.int64);
+			int64_t temp = FIX_ENDIANNESS_64_BE(value.int64);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
@@ -77,13 +77,13 @@ static void ubjf_s12_emit_float(ubjf_emit_ctx *ctx, ubjf_value value)
 	{
 		case UBJF_FLOAT32:
 		{
-			float temp = FIX_ENDIANNESS_32(value.float32);
+			float temp = FIX_ENDIANNESS_32_BE(value.float32);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
-			double temp = FIX_ENDIANNESS_64(value.float64);
+			double temp = FIX_ENDIANNESS_64_BE(value.float64);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}

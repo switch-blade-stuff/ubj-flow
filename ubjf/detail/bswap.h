@@ -65,11 +65,20 @@ static inline bswap_16(uint16_t value)
 
 #ifndef UBJF_BIG_ENDIAN
 
-#define FIX_ENDIANNESS_16(value) bswap_16(value)
-#define FIX_ENDIANNESS_32(value) bswap_32(value)
-#define FIX_ENDIANNESS_64(value) bswap_64(value)
+#define FIX_ENDIANNESS_16_BE(value) bswap_16(value)
+#define FIX_ENDIANNESS_32_BE(value) bswap_32(value)
+#define FIX_ENDIANNESS_64_BE(value) bswap_64(value)
+#define FIX_ENDIANNESS_16_LE(value) value
+#define FIX_ENDIANNESS_32_LE(value) value
+#define FIX_ENDIANNESS_64_LE(value) value
+
 #else
-#define FIX_ENDIANNESS_16(value) value
-#define FIX_ENDIANNESS_32(value) value
-#define FIX_ENDIANNESS_64(value) value
+
+#define FIX_ENDIANNESS_16_BE(value) value
+#define FIX_ENDIANNESS_32_BE(value) value
+#define FIX_ENDIANNESS_64_BE(value) value
+#define FIX_ENDIANNESS_16_LE(value) bswap_16(value)
+#define FIX_ENDIANNESS_32_LE(value) bswap_32(value)
+#define FIX_ENDIANNESS_64_LE(value) bswap_64(value)
+
 #endif

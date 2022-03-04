@@ -94,21 +94,21 @@ static void ubjf_s12_parse_integer(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value
 		{
 			int16_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int16 = FIX_ENDIANNESS_16(temp);
+			value->int16 = FIX_ENDIANNESS_16_BE(temp);
 			break;
 		}
 		case UBJF_INT32:
 		{
 			int32_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int32 = FIX_ENDIANNESS_32(temp);
+			value->int32 = FIX_ENDIANNESS_32_BE(temp);
 			break;
 		}
 		case UBJF_INT64:
 		{
 			int64_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int64 = FIX_ENDIANNESS_64(temp);
+			value->int64 = FIX_ENDIANNESS_64_BE(temp);
 			break;
 		}
 	}
@@ -121,14 +121,14 @@ static void ubjf_s12_parse_float(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *
 		{
 			float temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->float32 = FIX_ENDIANNESS_32(temp);
+			value->float32 = FIX_ENDIANNESS_32_BE(temp);
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
 			double temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->float64 = FIX_ENDIANNESS_64(temp);
+			value->float64 = FIX_ENDIANNESS_64_BE(temp);
 			break;
 		}
 	}
