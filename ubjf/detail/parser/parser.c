@@ -4,10 +4,10 @@
 
 #include "../../read.h"
 
-typedef ubjf_error (*ubjf_parser_func)(ubjf_read_state *restrict, size_t *restrict);
+typedef ubjf_error (*ubjf_parser_func)(ubjf_read_state *UBJF_RESTRICT, size_t *UBJF_RESTRICT);
 
 #ifndef UBJF_NO_SPEC_12
-ubjf_error ubjf_s12_read_next(ubjf_read_state *restrict, size_t *restrict);
+ubjf_error ubjf_s12_read_next(ubjf_read_state *UBJF_RESTRICT, size_t *UBJF_RESTRICT);
 #endif
 
 static const ubjf_parser_func ubjf_parser_syntax_table[] = {
@@ -16,7 +16,7 @@ static const ubjf_parser_func ubjf_parser_syntax_table[] = {
 #endif
 };
 
-ubjf_error ubjf_read_next(ubjf_read_state *state, size_t *nodes)
+ubjf_error ubjf_read_next(ubjf_read_state *UBJF_RESTRICT state, size_t *UBJF_RESTRICT nodes)
 {
 	return ubjf_parser_syntax_table[state->syntax](state, nodes);
 }

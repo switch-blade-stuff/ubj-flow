@@ -26,8 +26,12 @@ void ubjf_destroy_write(ubjf_write_state *state)
 		UBJF_FREE(state->container_stack);
 }
 
-static size_t ubjf_file_write(const void *src, size_t n, FILE *file) { return fwrite(src, 1, n, file); }
-ubjf_error ubjf_init_file_write(ubjf_write_state *state, ubjf_write_state_info init_info, FILE *file)
+static size_t ubjf_file_write(const void *UBJF_RESTRICT src, size_t n, FILE *UBJF_RESTRICT file)
+{
+	return fwrite(src, 1, n, file);
+}
+ubjf_error ubjf_init_file_write(ubjf_write_state *UBJF_RESTRICT state, ubjf_write_state_info init_info,
+                                FILE *UBJF_RESTRICT file)
 {
 #ifndef UBJF_DISABLE_CHECKS
 	if (UBJF_UNLIKELY(!state))
@@ -51,7 +55,8 @@ struct buffer_write_data
 	void *write_pos;
 	void *buffer_end;
 };
-static size_t ubjf_buffer_write(const void *src, size_t n, struct buffer_write_data *udata)
+static size_t ubjf_buffer_write(const void *UBJF_RESTRICT src, size_t n,
+                                struct buffer_write_data *UBJF_RESTRICT udata)
 {
 	size_t left = udata->buffer_end - udata->write_pos;
 	if (UBJF_UNLIKELY(left < n))
@@ -62,8 +67,8 @@ static size_t ubjf_buffer_write(const void *src, size_t n, struct buffer_write_d
 
 	return n;
 }
-ubjf_error ubjf_init_buffer_write(ubjf_write_state *state, ubjf_write_state_info init_info,
-                                  void *buffer, size_t buffer_size)
+ubjf_error ubjf_init_buffer_write(ubjf_write_state *UBJF_RESTRICT state, ubjf_write_state_info init_info,
+                                  void *UBJF_RESTRICT buffer, size_t buffer_size)
 {
 #ifndef UBJF_DISABLE_CHECKS
 	if (UBJF_UNLIKELY(!state))

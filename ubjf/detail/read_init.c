@@ -23,7 +23,10 @@ ubjf_error ubjf_init_read(ubjf_read_state *state, ubjf_read_state_info init_info
 }
 void ubjf_destroy_read(ubjf_read_state *state) {}
 
-static size_t ubjf_file_read(void *dest, size_t n, FILE *file) { return fread(dest, 1, n, file); }
+static size_t ubjf_file_read(void *UBJF_RESTRICT dest, size_t n, FILE *UBJF_RESTRICT file)
+{
+	return fread(dest, 1, n, file);
+}
 static size_t ubjf_file_bump(size_t n, FILE *file) { return fseek(file, n, SEEK_CUR) ? 0 : n; }
 static int ubjf_file_peek(FILE *file) { return ungetc(getc(file), file); }
 ubjf_error ubjf_init_file_read(ubjf_read_state *state, ubjf_read_state_info init_info, FILE *file)
@@ -52,7 +55,7 @@ struct buffer_read_data
 	const void *buffer;
 	size_t size;
 };
-static size_t ubjf_buffer_read(void *dest, size_t n, struct buffer_read_data *udata)
+static size_t ubjf_buffer_read(void *UBJF_RESTRICT dest, size_t n, struct buffer_read_data *UBJF_RESTRICT udata)
 {
 	if (UBJF_UNLIKELY(n > udata->size))
 		n = udata->size;
@@ -62,7 +65,7 @@ static size_t ubjf_buffer_read(void *dest, size_t n, struct buffer_read_data *ud
 	udata->size -= n;
 	return n;
 }
-static size_t ubjf_buffer_bump(size_t n, struct buffer_read_data *udata)
+static size_t ubjf_buffer_bump(size_t n, struct buffer_read_data *UBJF_RESTRICT udata)
 {
 	if (UBJF_UNLIKELY(n > udata->size))
 		n = udata->size;
@@ -74,8 +77,8 @@ static int ubjf_buffer_peek(struct buffer_read_data *udata)
 {
 	return udata->size ? *(const char *) udata->buffer : EOF;
 }
-ubjf_error ubjf_init_buffer_read(ubjf_read_state *state, ubjf_read_state_info init_info,
-                                 const void *buffer, size_t buffer_size)
+ubjf_error ubjf_init_buffer_read(ubjf_read_state *UBJF_RESTRICT state, ubjf_read_state_info init_info,
+                                 const void *UBJF_RESTRICT buffer, size_t buffer_size)
 {
 #ifndef UBJF_DISABLE_CHECKS
 	if (UBJF_UNLIKELY(!state))

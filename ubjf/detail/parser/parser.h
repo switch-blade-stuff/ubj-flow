@@ -22,7 +22,7 @@ typedef struct
 	size_t total_nodes;
 } ubjf_parse_ctx;
 
-static inline void ubjf_guarded_read(ubjf_parse_ctx *restrict ctx, void *restrict dest, size_t n)
+static inline void ubjf_guarded_read(ubjf_parse_ctx *UBJF_RESTRICT ctx, void *UBJF_RESTRICT dest, size_t n)
 {
 	if (UBJF_UNLIKELY(!(ctx->read_info.read && ctx->read_info.read(dest, n, ctx->read_info.udata) == n)))
 		THROW_ERROR(ctx->panic_buf, UBJF_EOF);

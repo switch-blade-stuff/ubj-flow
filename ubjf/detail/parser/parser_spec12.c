@@ -78,7 +78,7 @@ static void ubjf_s12_invoke_on_container_end(ubjf_parse_ctx *ctx)
 static void ubjf_s12_parse_node(ubjf_parse_ctx *ctx, ubjf_type type);
 static void ubjf_s12_read_node_recursive(ubjf_parse_ctx *ctx);
 
-static void ubjf_s12_parse_integer(ubjf_parse_ctx *restrict ctx, ubjf_value *restrict value)
+static void ubjf_s12_parse_integer(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
 {
 	switch (value->type)
 	{
@@ -113,7 +113,7 @@ static void ubjf_s12_parse_integer(ubjf_parse_ctx *restrict ctx, ubjf_value *res
 		}
 	}
 }
-static void ubjf_s12_parse_float(ubjf_parse_ctx *restrict ctx, ubjf_value *restrict value)
+static void ubjf_s12_parse_float(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
 {
 	switch (value->type)
 	{
@@ -148,7 +148,7 @@ static int64_t ubjf_s12_parse_length(ubjf_parse_ctx *ctx)
 
 	return length.int64;
 }
-static void ubjf_s12_parse_string(ubjf_parse_ctx *restrict ctx, ubjf_value *restrict value)
+static void ubjf_s12_parse_string(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
 {
 	int64_t length = ubjf_s12_parse_length(ctx);
 	char *str = ubjf_s12_invoke_string_alloc(ctx, length + 1); /* Add 1 for null terminator. */
@@ -250,9 +250,9 @@ static void ubjf_s12_parse_object(ubjf_parse_ctx *ctx, int64_t length, ubjf_type
 			ubjf_s12_read_node_recursive(ctx);
 		}
 }
-static void ubjf_s12_parse_container_preface(ubjf_parse_ctx *restrict ctx,
-                                             int64_t *restrict out_length,
-                                             ubjf_type *restrict out_value_type)
+static void ubjf_s12_parse_container_preface(ubjf_parse_ctx *UBJF_RESTRICT ctx,
+                                             int64_t *UBJF_RESTRICT out_length,
+                                             ubjf_type *UBJF_RESTRICT out_value_type)
 {
 	switch (ubjf_s12_peek_token(ctx))
 	{
@@ -316,7 +316,7 @@ static void ubjf_s12_read_node_recursive(ubjf_parse_ctx *ctx)
 	ubjf_s12_parse_node(ctx, type);
 }
 
-ubjf_error ubjf_s12_read_next(ubjf_read_state *restrict state, size_t *restrict nodes)
+ubjf_error ubjf_s12_read_next(ubjf_read_state *UBJF_RESTRICT state, size_t *UBJF_RESTRICT nodes)
 {
 #ifdef UBJF_DISABLE_CHECKS
 	if (UBJF_UNLIKELY(!state))

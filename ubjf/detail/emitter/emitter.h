@@ -19,7 +19,7 @@ typedef struct
 	ubjf_error error;
 } ubjf_emit_ctx;
 
-static inline void ubjf_guarded_write(ubjf_emit_ctx *restrict ctx, const void *restrict src, size_t n)
+static inline void ubjf_guarded_write(ubjf_emit_ctx *UBJF_RESTRICT ctx, const void *UBJF_RESTRICT src, size_t n)
 {
 	if (UBJF_UNLIKELY(!(ctx->write_info.write && ctx->write_info.write(src, n, ctx->write_info.udata) == n)))
 		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_WRITE);

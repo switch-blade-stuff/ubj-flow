@@ -70,7 +70,8 @@ UBJF_EXTERN void ubjf_destroy_write(ubjf_write_state *state);
  * @param[in] init_info Data used to initialize the state.
  * @param[in] file File to write to.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_file_write(ubjf_write_state *state, ubjf_write_state_info init_info, FILE *file);
+UBJF_EXTERN ubjf_error ubjf_init_file_write(ubjf_write_state *UBJF_RESTRICT state, ubjf_write_state_info init_info,
+                                            FILE *UBJF_RESTRICT file);
 /** Destroys a write state initialized with `ubjf_init_file_write`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_file_write(ubjf_write_state *state);
@@ -80,8 +81,8 @@ UBJF_EXTERN void ubjf_destroy_file_write(ubjf_write_state *state);
  * @param[in] buffer Buffer to write to. Must be non-NULL.
  * @param[in] buffer_size Size of the output buffer. Must be non-0.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_init_buffer_write(ubjf_write_state *state, ubjf_write_state_info init_info,
-                                              void *buffer, size_t buffer_size);
+UBJF_EXTERN ubjf_error ubjf_init_buffer_write(ubjf_write_state *UBJF_RESTRICT state, ubjf_write_state_info init_info,
+                                              void *UBJF_RESTRICT buffer, size_t buffer_size);
 /** Destroys a write state initialized with `ubjf_init_buffer_write`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_write(ubjf_write_state *state);
@@ -232,5 +233,5 @@ UBJF_EXTERN ubjf_error ubjf_end_container(ubjf_write_state *state);
  * @param[in] value_type Optional fixed type for the array.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
  * @note If a fixed type is specified, every value within the source array must be of the same type. */
-UBJF_EXTERN ubjf_error ubjf_write_array(ubjf_write_state *state, const ubjf_value *data, int64_t n,
-                                        ubjf_type value_type);
+UBJF_EXTERN ubjf_error ubjf_write_array(ubjf_write_state *UBJF_RESTRICT state, const ubjf_value *UBJF_RESTRICT data,
+                                        int64_t n, ubjf_type value_type);

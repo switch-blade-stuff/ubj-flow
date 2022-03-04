@@ -8,8 +8,10 @@
 
 #ifdef __cplusplus
 #define UBJF_EXTERN extern "C" UBJF_API
+#define UBJF_RESTRICT
 #else
 #define UBJF_EXTERN extern UBJF_API
+#define UBJF_RESTRICT restrict
 #endif
 
 #if !defined(UBJF_MALLOC) && !defined(UBJF_REALLOC) && !defined(UBJF_FREE)

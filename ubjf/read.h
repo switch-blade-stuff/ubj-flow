@@ -96,7 +96,8 @@ UBJF_EXTERN void ubjf_destroy_read(ubjf_read_state *state);
  * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
  * @note Read events will be initialized automatically. */
-UBJF_EXTERN ubjf_error ubjf_init_file_read(ubjf_read_state *state, ubjf_read_state_info init_info, FILE *file);
+UBJF_EXTERN ubjf_error ubjf_init_file_read(ubjf_read_state *UBJF_RESTRICT state, ubjf_read_state_info init_info,
+                                           FILE *UBJF_RESTRICT file);
 /** Destroys state previously initialized via `ubjf_init_file_read`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_file_read(ubjf_read_state *state);
@@ -109,8 +110,8 @@ UBJF_EXTERN void ubjf_destroy_file_read(ubjf_read_state *state);
  * Must be one of `UBJF_HIGHP_THROW`, `UBJF_HIGHP_SKIP` or `UBJF_HIGHP_AS_STRING`.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code.
  * @note Read events will be initialized automatically. */
-UBJF_EXTERN ubjf_error ubjf_init_buffer_read(ubjf_read_state *state, ubjf_read_state_info init_info,
-                                             const void *buffer, size_t buffer_size);
+UBJF_EXTERN ubjf_error ubjf_init_buffer_read(ubjf_read_state *UBJF_RESTRICT state, ubjf_read_state_info init_info,
+                                             const void *UBJF_RESTRICT buffer, size_t buffer_size);
 /** Destroys state previously initialized via `ubjf_init_buffer_read`.
  * @param[in] state State to destroy. */
 UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
@@ -119,4 +120,4 @@ UBJF_EXTERN void ubjf_destroy_buffer_read(ubjf_read_state *state);
  * @param[in] state State to use for reading.
  * @param[out] nodes Pointer to the value set to the amount of nodes processed. Optional.
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
-UBJF_EXTERN ubjf_error ubjf_read_next(ubjf_read_state *state, size_t *nodes);
+UBJF_EXTERN ubjf_error ubjf_read_next(ubjf_read_state *UBJF_RESTRICT state, size_t *UBJF_RESTRICT nodes);
