@@ -4,13 +4,7 @@
 
 #ifndef UBJF_NO_SPEC_12
 
-#include "../../write.h"
-
-#include <stdlib.h>
-
-#include "../error_handling.h"
-#include "../token.h"
-#include "../bswap.h"
+#include "emitter.h"
 
 static const ubjf_token ubjf_type_token_map[] = {
 		[UBJF_NULL]         = UBJF_TOKEN_NULL,
@@ -31,21 +25,8 @@ static const ubjf_token ubjf_type_token_map[] = {
 		[UBJF_OBJECT]       = UBJF_TOKEN_OBJECT_START,
 };
 
-typedef struct
-{
-	jmp_buf *panic_buf;
-	ubjf_write_event_info write_info;
-	ubjf_error error;
-} ubjf_s12_emit_ctx;
-
-static void ubjf_s12_guarded_write(ubjf_s12_emit_ctx *restrict ctx, const void *restrict src, size_t n)
-{
-	if (UBJF_UNLIKELY(!(ctx->write_info.write && ctx->write_info.write(src, n, ctx->write_info.udata) == n)))
-		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_WRITE);
-}
-
-static void ubjf_s12_emit_token(ubjf_s12_emit_ctx *ctx, ubjf_token token) { ubjf_s12_guarded_write(ctx, &token, 1); }
-static void ubjf_s12_emit_type_token(ubjf_s12_emit_ctx *ctx, ubjf_value value)
+static void ubjf_s12_emit_token(ubjf_emit_ctx *ctx, ubjf_token token) { ubjf_guarded_write(ctx, &token, 1); }
+static void ubjf_s12_emit_type_token(ubjf_emit_ctx *ctx, ubjf_value value)
 {
 	/* Store boolean value within the type. */
 	if (value.type == UBJF_BOOL)
@@ -57,7 +38,7 @@ static void ubjf_s12_emit_type_token(ubjf_s12_emit_ctx *ctx, ubjf_value value)
 
 	ubjf_s12_emit_token(ctx, token);
 }
-static void ubjf_s12_emit_integer(ubjf_s12_emit_ctx *ctx, ubjf_value value)
+static void ubjf_s12_emit_integer(ubjf_emit_ctx *ctx, ubjf_value value)
 {
 	switch (value.type)
 	{
@@ -65,52 +46,52 @@ static void ubjf_s12_emit_integer(ubjf_s12_emit_ctx *ctx, ubjf_value value)
 		case UBJF_UINT8:
 		{
 			uint8_t temp = value.uint8;
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT16:
 		{
 			int16_t temp = FIX_ENDIANNESS_16(value.int16);
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT32:
 		{
 			int32_t temp = FIX_ENDIANNESS_32(value.int32);
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT64:
 		{
 			int64_t temp = FIX_ENDIANNESS_64(value.int64);
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		default:
 			break;
 	}
 }
-static void ubjf_s12_emit_float(ubjf_s12_emit_ctx *ctx, ubjf_value value)
+static void ubjf_s12_emit_float(ubjf_emit_ctx *ctx, ubjf_value value)
 {
 	switch (value.type)
 	{
 		case UBJF_FLOAT32:
 		{
 			float temp = FIX_ENDIANNESS_32(value.float32);
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
 			double temp = FIX_ENDIANNESS_64(value.float64);
-			ubjf_s12_guarded_write(ctx, &temp, sizeof(temp));
+			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		default:
 			break;
 	}
 }
-static void ubjf_s12_emit_length(ubjf_s12_emit_ctx *ctx, int64_t length)
+static void ubjf_s12_emit_length(ubjf_emit_ctx *ctx, int64_t length)
 {
 	ubjf_value value = {.int64 = length};
 	if (length > INT32_MAX)
@@ -127,10 +108,10 @@ static void ubjf_s12_emit_length(ubjf_s12_emit_ctx *ctx, int64_t length)
 	ubjf_s12_emit_type_token(ctx, value);
 	ubjf_s12_emit_integer(ctx, value);
 }
-static void ubjf_s12_emit_string(ubjf_s12_emit_ctx *ctx, ubjf_string str)
+static void ubjf_s12_emit_string(ubjf_emit_ctx *ctx, ubjf_string str)
 {
 	ubjf_s12_emit_length(ctx, str.size);
-	ubjf_s12_guarded_write(ctx, str.data, str.size);
+	ubjf_guarded_write(ctx, str.data, str.size);
 }
 
 ubjf_error ubjf_s12_write_value(ubjf_write_state *state, ubjf_value value)
@@ -140,7 +121,7 @@ ubjf_error ubjf_s12_write_value(ubjf_write_state *state, ubjf_value value)
 		return UBJF_MAKE_PARAM_ERROR(0);
 #endif
 
-	ubjf_s12_emit_ctx ctx = {
+	ubjf_emit_ctx ctx = {
 			.panic_buf   = NULL,
 			.write_info  = state->write_event_info,
 			.error       = UBJF_NO_ERROR,
@@ -211,7 +192,7 @@ ubjf_error ubjf_s12_start_container(ubjf_write_state *state, ubjf_container_info
 			return result;
 	}
 
-	ubjf_s12_emit_ctx ctx = {
+	ubjf_emit_ctx ctx = {
 			.panic_buf  = NULL,
 			.write_info = state->write_event_info,
 			.error      = UBJF_NO_ERROR,
@@ -244,7 +225,7 @@ ubjf_error ubjf_s12_write_object_key(ubjf_write_state *state, ubjf_string key)
 		return UBJF_MAKE_PARAM_ERROR(0);
 #endif
 
-	ubjf_s12_emit_ctx ctx = {
+	ubjf_emit_ctx ctx = {
 			.panic_buf  = NULL,
 			.write_info = state->write_event_info,
 			.error      = UBJF_NO_ERROR,
@@ -267,7 +248,7 @@ ubjf_error ubjf_s12_end_container(ubjf_write_state *state)
 	ubjf_container_info container = *state->current_container;
 	if (container.length >= 0)
 	{
-		ubjf_s12_emit_ctx ctx = {
+		ubjf_emit_ctx ctx = {
 				.panic_buf  = NULL,
 				.write_info = state->write_event_info,
 				.error      = UBJF_NO_ERROR,
