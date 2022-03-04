@@ -15,6 +15,9 @@ else ()
 endif ()
 
 add_library(${PROJECT_NAME})
+if (NOT MSVC)
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
+endif ()
 
 option(UBJF_BIG_ENDIAN "Tells the library that the architecture is big-endian. By default, little-endian architectures are assumed." OFF)
 if (UBJF_BIG_ENDIAN)
@@ -24,6 +27,11 @@ endif ()
 option(UBJF_NO_CHECKS "Disables certain internal checks that may affect performance" OFF)
 if (UBJF_NO_CHECKS)
     add_compile_definitions(UBJF_DISABLE_CHECKS)
+endif ()
+
+option(UBJF_NO_SPEC_12 "Disables build of the spec. 12 UBJson syntax version" OFF)
+if (UBJF_NO_SPEC_12)
+    add_compile_definitions(UBJF_NO_SPEC_12)
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/ubjf/CMakeLists.txt)

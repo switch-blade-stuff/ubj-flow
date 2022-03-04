@@ -2,10 +2,10 @@
 // Created by switchblade on 2022-02-25.
 //
 
+#include "../write.h"
+
 #include <stdlib.h>
 #include <string.h>
-
-#include "write.h"
 
 ubjf_error ubjf_init_write(ubjf_write_state *state, ubjf_write_state_info init_info)
 {

@@ -2,7 +2,7 @@
 // Created by switchblade on 2022-02-23.
 //
 
-#include "read.h"
+#include "../read.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -6,8 +6,10 @@
 
 typedef enum
 {
-	/** Use UBJson spec. 12 syntax. */
+#ifndef UBJF_NO_SPEC_12
+	/** Use UBJson spec 12 syntax. */
 	UBJF_SPEC_12,
+#endif
 } ubjf_syntax;
 
 typedef enum
