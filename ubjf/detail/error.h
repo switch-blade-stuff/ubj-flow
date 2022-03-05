@@ -29,12 +29,10 @@ typedef enum
 	UBJF_EOF = -1,
 } ubjf_error;
 
-#define UBJF_CHECK_ERROR(error, value) (error) & (value)
-
-#define UBJF_PARAM_ERROR_MASK 0xff
+#define UBJF_PARAM_ERROR_MASK ((int) 0xff)
 #define UBJF_MAKE_PARAM_ERROR(index) (((index) & UBJF_PARAM_ERROR_MASK) | UBJF_ERROR_PARAM)
 #define UBJF_PARAM_ERROR_GET_INDEX(value) ((value) & UBJF_PARAM_ERROR_MASK)
-#define UBJF_IS_PARAM_ERROR(error) (((error) & (~(int) 0xff)) == UBJF_ERROR_PARAM)
+#define UBJF_IS_PARAM_ERROR(error) (((error) & (~UBJF_PARAM_ERROR_MASK)) == UBJF_ERROR_PARAM)
 
 /** Creates a formatted error message string.
  * @param[in] err Error to create message for.
