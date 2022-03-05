@@ -38,9 +38,8 @@ typedef enum
 
 /** Creates a formatted error message string.
  * @param[in] err Error to create message for.
- * @return Pointer to the allocated message string.
- * @note String will need to be de-allocated via `ubjf_free_error_message`. */
-UBJF_EXTERN const char *ubjf_make_error_msg(ubjf_error err);
-/** De-allocates error message obtained from `ubjf_make_error_msg`.
- * @param[in] msg Pointer to message string. */
-UBJF_EXTERN void ubjf_free_error_message(const char *msg);
+ * @param[out] str String to write the message to.
+ * @param[in] len Length of the output string.
+ * @return Amount of characters written to the output string (excluding the null terminator).
+ * If `str` is NULL or `len` is 0, returns the required length of the formatted string. */
+UBJF_EXTERN size_t ubjf_make_error_msg(ubjf_error err, char *str, size_t len);

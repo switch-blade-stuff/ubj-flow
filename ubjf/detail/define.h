@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 #include "export.h"
 
 #ifdef __cplusplus

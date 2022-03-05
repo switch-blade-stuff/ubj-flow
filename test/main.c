@@ -39,24 +39,23 @@ int main()
 
 void test_error_msg()
 {
-	assert(ubjf_make_error_msg(UBJF_NO_ERROR) == NULL);
-	assert(strcmp(ubjf_make_error_msg(UBJF_ERROR_ALLOC), "Memory allocation error") == 0);
+	assert(ubjf_make_error_msg(UBJF_NO_ERROR, NULL, 0) == 0);
 
-	const char *msg = ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(1));
+	char msg[64];
+	assert(ubjf_make_error_msg(UBJF_ERROR_ALLOC, msg, sizeof(msg)) != 0);
+	assert(strcmp(msg, "Memory allocation error") == 0);
+
+	assert(ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(1), msg, sizeof(msg)) != 0);
 	assert(strcmp(msg, "Unexpected argument [001]") == 0);
-	ubjf_free_error_message(msg);
 
-	msg = ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(20));
+	assert(ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(20), msg, sizeof(msg)) != 0);
 	assert(strcmp(msg, "Unexpected argument [020]") == 0);
-	ubjf_free_error_message(msg);
 
-	msg = ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(255));
+	assert(ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(255), msg, sizeof(msg)) != 0);
 	assert(strcmp(msg, "Unexpected argument [255]") == 0);
-	ubjf_free_error_message(msg);
 
-	msg = ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(256));
+	assert(ubjf_make_error_msg(UBJF_MAKE_PARAM_ERROR(256), msg, sizeof(msg)) != 0);
 	assert(strcmp(msg, "Unexpected argument [000]") == 0);
-	ubjf_free_error_message(msg);
 }
 
 void test_parse_error()
