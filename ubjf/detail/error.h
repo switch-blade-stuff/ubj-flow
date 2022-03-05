@@ -17,10 +17,10 @@ typedef enum
 	UBJF_ERROR_BAD_DATA,
 	/** Invalid type for this operation. */
 	UBJF_ERROR_BAD_TYPE,
-	/** Unknown error. */
-	UBJF_ERROR_UNKNOWN,
 	/** High precision number support is not enabled. */
 	UBJF_ERROR_HIGHP,
+	/** Unknown error. */
+	UBJF_ERROR_UNKNOWN,
 
 	/** Passed parameter is invalid. Use `UBJF_IS_PARAM_ERROR` to check if an error is parameter error. */
 	UBJF_ERROR_PARAM = 1 << 8, /* Index of the bad parameter stored as bottom 8 bits. */
@@ -34,7 +34,7 @@ typedef enum
 #define UBJF_PARAM_ERROR_MASK 0xff
 #define UBJF_MAKE_PARAM_ERROR(index) (((index) & UBJF_PARAM_ERROR_MASK) | UBJF_ERROR_PARAM)
 #define UBJF_PARAM_ERROR_GET_INDEX(value) ((value) & UBJF_PARAM_ERROR_MASK)
-#define UBJF_IS_PARAM_ERROR(error) (((error) & UBJF_ERROR_PARAM) == UBJF_ERROR_PARAM)
+#define UBJF_IS_PARAM_ERROR(error) (((error) & (~(int) 0xff)) == UBJF_ERROR_PARAM)
 
 /** Creates a formatted error message string.
  * @param[in] err Error to create message for.
