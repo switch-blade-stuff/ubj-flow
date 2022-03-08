@@ -178,7 +178,7 @@ static inline ubjf_error ubjf_write_int64(ubjf_write_state *state, int64_t i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_float32(ubjf_write_state *state, float i)
 {
-	ubjf_value value = {.type = UBJF_INT32, .float32 = i};
+	ubjf_value value = {.type = UBJF_INT32, .floating = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a float64 to the target state.
@@ -187,7 +187,7 @@ static inline ubjf_error ubjf_write_float32(ubjf_write_state *state, float i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_float64(ubjf_write_state *state, double i)
 {
-	ubjf_value value = {.type = UBJF_INT64, .float64 = i};
+	ubjf_value value = {.type = UBJF_INT64, .floating = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a high-precision number to the target state.

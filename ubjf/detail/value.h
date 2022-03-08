@@ -23,10 +23,8 @@ typedef struct
 	{
 		bool boolean;
 		char character;
-		/* All integer types are stored here. */
 		int64_t integer;
-		float float32;
-		double float64;
+		double floating;
 		ubjf_string highp;
 		ubjf_string string;
 	};

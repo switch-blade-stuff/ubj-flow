@@ -77,13 +77,13 @@ static void ubjf_s12_emit_float(ubjf_emit_ctx *ctx, ubjf_value value)
 	{
 		case UBJF_FLOAT32:
 		{
-			float temp = FIX_ENDIANNESS_32_BE(value.float32);
+			float temp = FIX_ENDIANNESS_32_BE((float) value.floating);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
-			double temp = FIX_ENDIANNESS_64_BE(value.float64);
+			double temp = FIX_ENDIANNESS_64_BE(value.floating);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}

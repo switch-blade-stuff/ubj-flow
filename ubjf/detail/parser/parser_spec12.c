@@ -121,14 +121,14 @@ static void ubjf_s12_parse_float(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *
 		{
 			float temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->float32 = FIX_ENDIANNESS_32_BE(temp);
+			value->floating = FIX_ENDIANNESS_32_BE(temp);
 			break;
 		}
 		case UBJF_FLOAT64:
 		{
 			double temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->float64 = FIX_ENDIANNESS_64_BE(temp);
+			value->floating = FIX_ENDIANNESS_64_BE(temp);
 			break;
 		}
 	}
