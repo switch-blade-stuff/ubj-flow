@@ -133,7 +133,7 @@ static inline ubjf_error ubjf_write_char(ubjf_write_state *state, char c)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_int8(ubjf_write_state *state, int8_t i)
 {
-	ubjf_value value = {.type = UBJF_INT8, .int8 = i};
+	ubjf_value value = {.type = UBJF_INT8, .integer = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a uint8 to the target state.
@@ -142,7 +142,7 @@ static inline ubjf_error ubjf_write_int8(ubjf_write_state *state, int8_t i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_uint8(ubjf_write_state *state, uint8_t i)
 {
-	ubjf_value value = {.type = UBJF_UINT8, .uint8 = i};
+	ubjf_value value = {.type = UBJF_UINT8, .integer = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a int16 to the target state.
@@ -151,7 +151,7 @@ static inline ubjf_error ubjf_write_uint8(ubjf_write_state *state, uint8_t i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_int16(ubjf_write_state *state, int16_t i)
 {
-	ubjf_value value = {.type = UBJF_INT16, .int16 = i};
+	ubjf_value value = {.type = UBJF_INT16, .integer = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a int32 to the target state.
@@ -160,7 +160,7 @@ static inline ubjf_error ubjf_write_int16(ubjf_write_state *state, int16_t i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_int32(ubjf_write_state *state, int32_t i)
 {
-	ubjf_value value = {.type = UBJF_INT32, .int32 = i};
+	ubjf_value value = {.type = UBJF_INT32, .integer = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a int64 to the target state.
@@ -169,7 +169,7 @@ static inline ubjf_error ubjf_write_int32(ubjf_write_state *state, int32_t i)
  * @return On success, returns `UBJF_NO_ERROR`. On error, returns the error code. */
 static inline ubjf_error ubjf_write_int64(ubjf_write_state *state, int64_t i)
 {
-	ubjf_value value = {.type = UBJF_INT64, .int64 = i};
+	ubjf_value value = {.type = UBJF_INT64, .integer = i};
 	return ubjf_write_value(state, value);
 }
 /** Writes a float32 to the target state.

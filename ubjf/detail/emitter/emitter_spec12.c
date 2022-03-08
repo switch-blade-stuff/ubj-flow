@@ -45,25 +45,25 @@ static void ubjf_s12_emit_integer(ubjf_emit_ctx *ctx, ubjf_value value)
 		case UBJF_INT8:
 		case UBJF_UINT8:
 		{
-			uint8_t temp = value.uint8;
+			uint8_t temp = value.integer;
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT16:
 		{
-			int16_t temp = FIX_ENDIANNESS_16_BE(value.int16);
+			int16_t temp = FIX_ENDIANNESS_16_BE((int16_t) value.integer);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT32:
 		{
-			int32_t temp = FIX_ENDIANNESS_32_BE(value.int32);
+			int32_t temp = FIX_ENDIANNESS_32_BE((int32_t) value.integer);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
 		case UBJF_INT64:
 		{
-			int64_t temp = FIX_ENDIANNESS_64_BE(value.int64);
+			int64_t temp = FIX_ENDIANNESS_64_BE(value.integer);
 			ubjf_guarded_write(ctx, &temp, sizeof(temp));
 			break;
 		}
@@ -93,7 +93,7 @@ static void ubjf_s12_emit_float(ubjf_emit_ctx *ctx, ubjf_value value)
 }
 static void ubjf_s12_emit_length(ubjf_emit_ctx *ctx, int64_t length)
 {
-	ubjf_value value = {.int64 = length};
+	ubjf_value value = {.integer = length};
 	if (length > INT32_MAX)
 		value.type = UBJF_INT64;
 	else if (length > INT16_MAX)

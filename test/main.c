@@ -259,14 +259,14 @@ void test_write_int_array()
 	char buffer[sizeof(expected)] = {0};
 
 	const ubjf_value data[8] = {
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
-			{.type = UBJF_INT16, .int16 = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
+			{.type = UBJF_INT16, .integer = (int16_t) 0xaabb},
 	};
 
 	ubjf_write_state_info info = {};

@@ -87,28 +87,28 @@ static void ubjf_s12_parse_integer(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value
 		{
 			uint8_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->uint8 = temp;
+			value->integer = temp;
 			break;
 		}
 		case UBJF_INT16:
 		{
 			int16_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int16 = FIX_ENDIANNESS_16_BE(temp);
+			value->integer = FIX_ENDIANNESS_16_BE(temp);
 			break;
 		}
 		case UBJF_INT32:
 		{
 			int32_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int32 = FIX_ENDIANNESS_32_BE(temp);
+			value->integer = FIX_ENDIANNESS_32_BE(temp);
 			break;
 		}
 		case UBJF_INT64:
 		{
 			int64_t temp;
 			ubjf_guarded_read(ctx, &temp, sizeof(temp));
-			value->int64 = FIX_ENDIANNESS_64_BE(temp);
+			value->integer = FIX_ENDIANNESS_64_BE(temp);
 			break;
 		}
 	}
@@ -143,10 +143,10 @@ static int64_t ubjf_s12_parse_length(ubjf_parse_ctx *ctx)
 	 * Since all integer values are stored in a union,
 	 * using int64 will cover all possible integer sizes. */
 	ubjf_s12_parse_integer(ctx, &length);
-	if (length.int64 < 0)
+	if (length.integer < 0)
 		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_BAD_DATA);
 
-	return length.int64;
+	return length.integer;
 }
 static void ubjf_s12_parse_string(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
 {
