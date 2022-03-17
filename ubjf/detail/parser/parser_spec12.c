@@ -33,47 +33,6 @@ static ubjf_token ubjf_s12_read_token(ubjf_parse_ctx *ctx)
 }
 static ubjf_token ubjf_s12_peek_token(ubjf_parse_ctx *ctx) { return (ubjf_token) ubjf_guarded_peek(ctx); }
 
-static void ubjf_s12_invoke_on_value(ubjf_parse_ctx *ctx, ubjf_value value)
-{
-	if (UBJF_LIKELY(ctx->parse_info.on_value))
-	{
-		ubjf_error result = ctx->parse_info.on_value(value, ctx->parse_info.udata);
-		if (result != UBJF_NO_ERROR)
-			THROW_ERROR(ctx->panic_buf, result);
-	}
-}
-static char *ubjf_s12_invoke_string_alloc(ubjf_parse_ctx *ctx, size_t size)
-{
-	char *str;
-	if (UBJF_LIKELY(ctx->parse_info.on_string_alloc))
-		str = ctx->parse_info.on_string_alloc(size, ctx->parse_info.udata);
-	else
-		str = (char *) UBJF_MALLOC(size);
-
-	if (UBJF_UNLIKELY(!str))
-		THROW_ERROR(ctx->panic_buf, UBJF_ERROR_ALLOC);
-	return str;
-}
-static void ubjf_s12_invoke_on_container_begin(ubjf_parse_ctx *ctx, ubjf_type container_type, size_t length,
-                                               ubjf_type value_type)
-{
-	if (UBJF_LIKELY(ctx->parse_info.on_container_begin))
-	{
-		ubjf_error result = ctx->parse_info.on_container_begin(container_type, length, value_type,
-		                                                       ctx->parse_info.udata);
-		if (result != UBJF_NO_ERROR)
-			THROW_ERROR(ctx->panic_buf, result);
-	}
-}
-static void ubjf_s12_invoke_on_container_end(ubjf_parse_ctx *ctx)
-{
-	if (UBJF_LIKELY(ctx->parse_info.on_container_end))
-	{
-		ubjf_error result = ctx->parse_info.on_container_end(ctx->parse_info.udata);
-		if (result != UBJF_NO_ERROR)
-			THROW_ERROR(ctx->panic_buf, result);
-	}
-}
 
 static void ubjf_s12_parse_node(ubjf_parse_ctx *ctx, ubjf_type type);
 static void ubjf_s12_read_node_recursive(ubjf_parse_ctx *ctx);
@@ -148,22 +107,30 @@ static int64_t ubjf_s12_parse_length(ubjf_parse_ctx *ctx)
 
 	return length.integer;
 }
-static void ubjf_s12_parse_string(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
+static bool ubjf_s12_parse_string(ubjf_parse_ctx *UBJF_RESTRICT ctx, ubjf_value *UBJF_RESTRICT value)
 {
 	int64_t length = ubjf_s12_parse_length(ctx);
-	char *str = ubjf_s12_invoke_string_alloc(ctx, length + 1); /* Add 1 for null terminator. */
+	char *str = ubjf_invoke_string_alloc(ctx, length + 1); /* Add 1 for null terminator. */
+
+	/* String alloc may return NULL. In that case, ignore the string. */
+	if (UBJF_UNLIKELY(!str))
+	{
+		ubjf_guarded_bump(ctx, length);
+		return false;
+	}
 
 	/* Guard for string read. */
 	GUARD_ERROR(ctx->panic_buf, ctx->error)
 	{
 		ubjf_guarded_read(ctx, str, length);
+		END_GUARD(ctx->panic_buf);
 	} else RETHROW_ERROR(ctx->panic_buf, ctx->error);
-	END_GUARD(ctx->panic_buf);
 
 	/* If reached here, we have read a string now. */
 	str[length] = '\0';
 	value->string.data = str;
 	value->string.size = length;
+	return true;
 }
 static void ubjf_s12_skip_highp(ubjf_parse_ctx *ctx)
 {
@@ -182,20 +149,23 @@ static void ubjf_s12_parse_value(ubjf_parse_ctx *ctx, ubjf_type type)
 	else if (type & UBJF_FLOAT_TYPE_MASK)
 		ubjf_s12_parse_float(ctx, &value);
 	else if (type == UBJF_TOKEN_STRING)
-		ubjf_s12_parse_string(ctx, &value);
-	else if (type == UBJF_TOKEN_HIGHP)
+	{
+		parse_string:
+		if (UBJF_UNLIKELY(!ubjf_s12_parse_string(ctx, &value)))
+			return;
+	} else if (type == UBJF_TOKEN_HIGHP)
 	{
 		if (ctx->highp_mode == UBJF_HIGHP_SKIP)
 		{
 			ubjf_s12_skip_highp(ctx);
-			return; /* Don't invoke value event  since wwe are skipping it. */
+			return;
 		} else if (ctx->highp_mode == UBJF_HIGHP_AS_STRING)
-			ubjf_s12_parse_string(ctx, &value);
+			goto parse_string;
 		else
 			THROW_ERROR(ctx->panic_buf, UBJF_ERROR_HIGHP);
 	}
 
-	ubjf_s12_invoke_on_value(ctx, value);
+	ubjf_invoke_on_value(ctx, value);
 }
 
 static void ubjf_s12_parse_sized_container_next(ubjf_parse_ctx *ctx, ubjf_type value_type)
@@ -284,7 +254,7 @@ static void ubjf_s12_parse_container(ubjf_parse_ctx *ctx, ubjf_type type)
 	ubjf_type value_type = UBJF_NO_TYPE;
 	ubjf_s12_parse_container_preface(ctx, &length, &value_type);
 
-	ubjf_s12_invoke_on_container_begin(ctx, type, length, value_type);
+	ubjf_invoke_on_container_begin(ctx, type, length, value_type);
 
 	/* Guard for container parse. */
 	GUARD_ERROR(ctx->panic_buf, ctx->error)
@@ -295,7 +265,7 @@ static void ubjf_s12_parse_container(ubjf_parse_ctx *ctx, ubjf_type type)
 			ubjf_s12_parse_object(ctx, length, value_type);
 	} else RETHROW_ERROR(ctx->panic_buf, ctx->error);
 	END_GUARD(ctx->panic_buf);
-	ubjf_s12_invoke_on_container_end(ctx);
+	ubjf_invoke_on_container_end(ctx);
 }
 
 static void ubjf_s12_parse_node(ubjf_parse_ctx *ctx, ubjf_type type)
