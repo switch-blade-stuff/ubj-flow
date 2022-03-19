@@ -2,7 +2,7 @@
 // Created by switchblade on 2022-03-03.
 //
 
-#include "../../write.h"
+#include "write.h"
 
 typedef struct
 {

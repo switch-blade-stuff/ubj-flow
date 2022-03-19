@@ -4,7 +4,7 @@
 
 #ifndef UBJF_NO_SPEC_12
 
-#include "parser.h"
+#include "../parser.h"
 
 static const ubjf_type ubjf_s12_token_type_map[UBJF_TOKEN_MAX] = {
 		[UBJF_TOKEN_NULL]         = UBJF_NULL,

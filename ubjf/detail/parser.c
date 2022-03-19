@@ -2,7 +2,7 @@
 // Created by switchblade on 2022-03-03.
 //
 
-#include "../../read.h"
+#include "read.h"
 
 typedef ubjf_error (*ubjf_parser_func)(ubjf_read_state *UBJF_RESTRICT, size_t *UBJF_RESTRICT);
 

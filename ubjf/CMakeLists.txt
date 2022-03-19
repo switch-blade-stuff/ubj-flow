@@ -19,12 +19,12 @@ target_sources(${PROJECT_NAME} INTERFACE
 target_sources(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/detail/error.c
         ${CMAKE_CURRENT_LIST_DIR}/detail/read_init.c
-        ${CMAKE_CURRENT_LIST_DIR}/detail/write_init.c)
+        ${CMAKE_CURRENT_LIST_DIR}/detail/write_init.c
+        ${CMAKE_CURRENT_LIST_DIR}/detail/parser.h
+        ${CMAKE_CURRENT_LIST_DIR}/detail/parser.c
+        ${CMAKE_CURRENT_LIST_DIR}/detail/emitter.h
+        ${CMAKE_CURRENT_LIST_DIR}/detail/emitter.c)
 
 target_sources(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/detail/parser/parser.h ${CMAKE_CURRENT_LIST_DIR}/detail/parser/parser.c
-        ${CMAKE_CURRENT_LIST_DIR}/detail/parser/parser_spec12.c)
-
-target_sources(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/detail/emitter/emitter.h ${CMAKE_CURRENT_LIST_DIR}/detail/emitter/emitter.c
-        ${CMAKE_CURRENT_LIST_DIR}/detail/emitter/emitter_spec12.c)
+        ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/parser_spec12.c
+        ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/emitter_spec12.c)

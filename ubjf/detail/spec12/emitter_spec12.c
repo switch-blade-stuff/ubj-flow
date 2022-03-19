@@ -4,7 +4,7 @@
 
 #ifndef UBJF_NO_SPEC_12
 
-#include "emitter.h"
+#include "../emitter.h"
 
 static const ubjf_token ubjf_type_token_map[] = {
 		[UBJF_NULL]         = UBJF_TOKEN_NULL,

@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "../../write.h"
+#include "write.h"
 
 #include <stdlib.h>
 
-#include "../error_handling.h"
-#include "../token.h"
-#include "../bswap.h"
+#include "error_handling.h"
+#include "token.h"
+#include "bswap.h"
 
 typedef struct
 {
