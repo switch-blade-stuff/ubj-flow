@@ -25,6 +25,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/detail/emitter.h
         ${CMAKE_CURRENT_LIST_DIR}/detail/emitter.c)
 
-target_sources(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/parser_spec12.c
-        ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/emitter_spec12.c)
+if (NOT UBJF_NO_SPEC_12)
+    target_sources(${PROJECT_NAME} PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/parser_spec12.c
+            ${CMAKE_CURRENT_LIST_DIR}/detail/spec12/emitter_spec12.c)
+endif ()
