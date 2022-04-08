@@ -39,6 +39,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/ubjf/CMakeLists.txt)
 
 # TODO: Add install target
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+option(UBJF_NO_TESTS "Disables unit test target for Debug build" OFF)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND NOT UBJF_NO_TESTS)
     add_subdirectory(test)
 endif ()
