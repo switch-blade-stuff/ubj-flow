@@ -40,4 +40,4 @@ typedef enum
 #define UBJF_EVENT_ERROR_MASK ((int) 0xffff)
 #define UBJF_MAKE_EVENT_ERROR(index) (((index) & UBJF_EVENT_ERROR_MASK) | UBJF_ERROR_EVENT)
 #define UBJF_IS_EVENT_ERROR(index) ((error) & UBJF_ERROR_EVENT)
-#define UBJF_EVENT_ERROR_DET_DATA(index) (((index) & (UBJF_EVENT_ERROR_MASK)) == UBJF_ERROR_EVENT)
+#define UBJF_EVENT_ERROR_DET_DATA(index) ((index) & (UBJF_EVENT_ERROR_MASK))
