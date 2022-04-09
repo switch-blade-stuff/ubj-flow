@@ -33,11 +33,11 @@ typedef enum
 } ubjf_error;
 
 #define UBJF_PARAM_ERROR_MASK ((int) 0xffff)
-#define UBJF_MAKE_PARAM_ERROR(index) (((index) & UBJF_PARAM_ERROR_MASK) | UBJF_ERROR_PARAM)
+#define UBJF_MAKE_PARAM_ERROR(index) (ubjf_error)(((index) & UBJF_PARAM_ERROR_MASK) | UBJF_ERROR_PARAM)
 #define UBJF_IS_PARAM_ERROR(error) ((error) & UBJF_ERROR_PARAM)
 #define UBJF_PARAM_ERROR_GET_INDEX(value) ((value) & UBJF_PARAM_ERROR_MASK)
 
 #define UBJF_EVENT_ERROR_MASK ((int) 0xffff)
-#define UBJF_MAKE_EVENT_ERROR(index) (((index) & UBJF_EVENT_ERROR_MASK) | UBJF_ERROR_EVENT)
+#define UBJF_MAKE_EVENT_ERROR(index) (ubjf_error)(((index) & UBJF_EVENT_ERROR_MASK) | UBJF_ERROR_EVENT)
 #define UBJF_IS_EVENT_ERROR(index) ((error) & UBJF_ERROR_EVENT)
 #define UBJF_EVENT_ERROR_DET_DATA(index) ((index) & (UBJF_EVENT_ERROR_MASK))
