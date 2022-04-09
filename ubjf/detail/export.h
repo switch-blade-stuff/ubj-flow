@@ -9,20 +9,20 @@
 #  ifndef UBJF_API
 #    ifdef ubjf_EXPORTS
         /* We are building this library */
-#      define UBJF_API __attribute__((visibility("default")))
+#      define UBJF_API __declspec(dllexport)
 #    else
         /* We are using this library */
-#      define UBJF_API __attribute__((visibility("default")))
+#      define UBJF_API __declspec(dllimport)
 #    endif
 #  endif
 
 #  ifndef UBJF_NO_EXPORT
-#    define UBJF_NO_EXPORT __attribute__((visibility("hidden")))
+#    define UBJF_NO_EXPORT 
 #  endif
 #endif
 
 #ifndef UBJF_DEPRECATED
-#  define UBJF_DEPRECATED __attribute__ ((__deprecated__))
+#  define UBJF_DEPRECATED __declspec(deprecated)
 #endif
 
 #ifndef UBJF_DEPRECATED_EXPORT

@@ -52,7 +52,7 @@ void ubjf_destroy_file_read(ubjf_read_state *state) { ubjf_destroy_read(state); 
 
 struct buffer_read_data
 {
-	const void *buffer;
+	const char *buffer;
 	size_t size;
 };
 static size_t ubjf_buffer_read(void *UBJF_RESTRICT dest, size_t n, struct buffer_read_data *UBJF_RESTRICT udata)

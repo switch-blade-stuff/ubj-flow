@@ -8,7 +8,7 @@
 
 #include <byteswap.h>
 
-#elif
+#else
 #ifdef _MSC_VER
 
 #include <stdlib.h>
